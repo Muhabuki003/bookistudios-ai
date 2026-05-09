@@ -3,7 +3,6 @@
  * for Docker builds.
  */
 import "./src/env.js";
-
 function getInternalServiceURL(envKey, fallbackURL) {
   const configured = process.env[envKey]?.trim();
   return configured && configured.length > 0
@@ -11,9 +10,7 @@ function getInternalServiceURL(envKey, fallbackURL) {
     : fallbackURL;
 }
 import nextra from "nextra";
-
 const withNextra = nextra({});
-
 /** @type {import("next").NextConfig} */
 const config = {
   i18n: {
@@ -21,13 +18,15 @@ const config = {
     defaultLocale: "en",
   },
   devIndicators: false,
+  experimental: {
+    turboCacheDir: ".next/cache",
+  },
   async rewrites() {
     const rewrites = [];
     const gatewayURL = getInternalServiceURL(
       "DEER_FLOW_INTERNAL_GATEWAY_BASE_URL",
       "http://127.0.0.1:8001",
     );
-
     if (!process.env.NEXT_PUBLIC_LANGGRAPH_BASE_URL) {
       rewrites.push({
         source: "/api/langgraph",
@@ -38,7 +37,6 @@ const config = {
         destination: `${gatewayURL}/api/:path*`,
       });
     }
-
     if (!process.env.NEXT_PUBLIC_BACKEND_BASE_URL) {
       rewrites.push({
         source: "/api/agents",
@@ -56,22 +54,12 @@ const config = {
         source: "/api/skills/:path*",
         destination: `${gatewayURL}/api/skills/:path*`,
       });
-
-      // Catch-all for remaining gateway API routes (models, threads, memory,
-      // mcp, artifacts, uploads, suggestions, runs, etc.) that don't have
-      // their own NEXT_PUBLIC_* env var toggle.
-      //
-      // NOTE: this must come AFTER the /api/langgraph rewrite above so that
-      // LangGraph-compatible routes keep their public prefix while Gateway
-      // receives its native /api/* paths.
       rewrites.push({
         source: "/api/:path*",
         destination: `${gatewayURL}/api/:path*`,
       });
     }
-
     return rewrites;
   },
 };
-
 export default withNextra(config);
