@@ -9,8 +9,7 @@ import pytest
 import yaml
 from fastapi.testclient import TestClient
 
-from deerflow.config.agents_api_config import AgentsApiConfig, get_agents_api_config, set_agents_api_config
-
+from deerflow.agents.middlewares.summarization_middleware import BeforeSummarizationHook, bookistudiosAISummarizationMiddleware
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
