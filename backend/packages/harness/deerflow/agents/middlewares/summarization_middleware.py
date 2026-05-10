@@ -95,7 +95,7 @@ class _SkillBundle:
     skill_key: str
 
 
-class bookistudios AISummarizationMiddleware(SummarizationMiddleware):
+class bookistudiosAISummarizationMiddleware(SummarizationMiddleware):
     """Summarization middleware with pre-compression hook dispatch and skill rescue."""
 
     def __init__(
