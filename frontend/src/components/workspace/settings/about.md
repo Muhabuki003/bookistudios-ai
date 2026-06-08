@@ -1,47 +1,27 @@
 # About BookiStudio AI
 
-> **Your AI Workspace**
+> **Built by Adrien** — founder of BookiStudios / BUKIMIND
 
-**BookiStudio AI** is a community-driven SuperAgent harness that researches, codes, and creates.
-With the help of sandboxes, memories, tools and skills, it handles
-different levels of tasks that could take minutes to hours.
+**BookiStudio AI** is a private, employee-grade AI workspace built from the ground up by Adrien. It's designed to give every member of the team their own intelligent agent — one that researches, codes, creates, and executes tasks autonomously.
+
+This isn't a community project or a fork. BookiStudio AI is **Adrien's vision** — a SuperAgent harness that runs your business operations, handles workflows, and scales with the team.
 
 ---
 
 ## 📧 Support
 
-If you have any questions or need help, please contact us at [support@bookistudios.com](mailto:support@bookistudios.com).
+For questions, help, or feature requests: [support@bookistudios.com](mailto:support@bookistudios.com)
 
 ---
 
 ## 📜 License
 
-bookistudios AI is proudly open source and distributed under the **MIT License**.
+**MIT License** — Free to use, modify, and share.
 
 ---
 
-## 🙌 Acknowledgments
+## 👤 Built By
 
-We extend our heartfelt gratitude to the open source projects and contributors who have made bookistudios AI a reality. We truly stand on the shoulders of giants.
+> **Adrien** — Founder, BookiStudios / BUKIMIND
 
-### Core Frameworks
-
-- **LangChain**: A phenomenal framework that powers our LLM interactions and chains.
-- **LangGraph**: Enabling sophisticated multi-agent orchestration.
-- **Next.js**: A cutting-edge framework for building web applications.
-
-### UI Libraries
-
-- **Shadcn**: Minimalistic components that power our UI.
-- **SToneX**: For his invaluable contribution to token-by-token visual effects.
-
-These outstanding projects form the backbone of bookistudios AI and exemplify the transformative power of open source collaboration.
-
-### Special Thanks
-
-Finally, we want to express our heartfelt gratitude to the core authors of bookistudios AI 1.0 and 2.0:
-
-- **Daniel Walnut**
-- **Henry Li**
-
-Without their vision, passion and dedication, `bookistudios AI` would not be what it is today.
+BookiStudio AI is the result of Adrien's push to build an AI-powered workflow platform that puts the team first. No middlemen, no corporate bloat — just agents that work for you.
