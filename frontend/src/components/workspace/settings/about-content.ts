@@ -4,9 +4,11 @@
  */
 export const aboutMarkdown = `# BookiStudio AI
 
-**Your AI Workspace**
+> **Built by Adrien** — Founder of BookiStudios / BUKIMIND
 
-A powerful **super agent** that orchestrates **sub-agents**, **memory**, and **sandboxes** to do almost anything — powered by **extensible skills**.
+**BookiStudio AI** is a private, employee-grade AI workspace built from the ground up by **Adrien**. It gives every member of the team their own intelligent agent that researches, codes, creates, and executes tasks autonomously.
+
+This is Adrien's vision — a SuperAgent harness designed to run your business operations, handle workflows, and scale with the team. No middlemen, no corporate bloat. Just agents that work for you.
 
 ### Core Features
 
@@ -15,4 +17,10 @@ A powerful **super agent** that orchestrates **sub-agents**, **memory**, and **s
 * **Sandbox & File System**: Execute code and manipulate files safely.
 * **Context Engineering**: Keep the context window sharp with summarization.
 * **Long-Term Memory**: Remember your profile, preferences, and history.
+
+---
+
+### 📧 Support
+
+[support@bookistudios.com](mailto:support@bookistudios.com)
 `;

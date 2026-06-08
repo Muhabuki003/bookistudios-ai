@@ -31,6 +31,7 @@ services:
       - "${PORT:-2026}:2026"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf.template:ro
+      - ../hq-dashboard:/usr/share/nginx/hq-dashboard:ro
     command: >
       sh -c "cp /etc/nginx/nginx.conf.template /etc/nginx/nginx.conf
       && nginx -g 'daemon off;'"
@@ -38,6 +39,7 @@ services:
       - frontend
       - gateway
       - office-server
+      - hermes-bridge
     networks:
       - bookistudios-ai
     restart: unless-stopped
@@ -50,6 +52,21 @@ services:
     container_name: bookistudios-ai-office
     volumes:
       - ../boss-desk:/app/boss-desk
+    networks:
+      - bookistudios-ai
+    restart: unless-stopped
+
+  # ── Hermes Chat Bridge ─────────────────────────────────────────────────
+  hermes-bridge:
+    build:
+      context: ../hermes-bridge
+      dockerfile: Dockerfile
+    container_name: bookistudios-ai-hermes-bridge
+    volumes:
+      - hermes-bridge-data:/data
+    environment:
+      - HERMES_BRIDGE_HOST=0.0.0.0
+      - HERMES_BRIDGE_PORT=8004
     networks:
       - bookistudios-ai
     restart: unless-stopped
@@ -157,6 +174,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 6
+
+volumes:
+  hermes-bridge-data:
+
 networks:
   bookistudios-ai:
     driver: bridge

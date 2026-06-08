@@ -19,6 +19,7 @@ from app.gateway.routers import (
     channels,
     feedback,
     mcp,
+    mcp_credentials,
     memory,
     models,
     runs,
@@ -333,6 +334,9 @@ This gateway provides custom endpoints for models, MCP configuration, skills, an
 
     # MCP API is mounted at /api/mcp
     app.include_router(mcp.router)
+
+    # MCP Credentials API is mounted at /api/mcp/credentials (user-specific)
+    app.include_router(mcp_credentials.router)
 
     # Memory API is mounted at /api/memory
     app.include_router(memory.router)

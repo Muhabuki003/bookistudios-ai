@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookiStudio HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0a0f;
+  --surface: rgba(255,255,255,0.04);
+  --surface-hover: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e8e8ed;
+  --text-secondary: #888;
+  --text-muted: #555;
+  --accent: #F59E0B;
+  --accent-dim: rgba(245,158,11,0.15);
+  --accent-glow: rgba(245,158,11,0.08);
+  --green: #22c55e;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+html, body { height: 100%; font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+body {
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,0.04) 0%, transparent 70%),
+              radial-gradient(ellipse 60% 40% at 80% 90%, rgba(245,158,11,0.02) 0%, transparent 60%),
+              var(--bg);
+}
+
+/* ── Layout ── */
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px; border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(10,10,15,0.6); flex-shrink: 0; z-index: 10;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: #0a0a0f; cursor: pointer;
+}
+.header-title { font-weight: 600; font-size: 16px; letter-spacing: -0.3px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.header-user { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+.crown { animation: pulse-glow 2s ease-in-out infinite; }
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(245,158,11,0.3)); }
+  50% { filter: drop-shadow(0 0 8px rgba(245,158,11,0.6)); }
+}
+.header-clock { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.status-dot.online { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+.status-dot.offline { background: var(--text-muted); }
+
+/* Main */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* Chat Panel */
+.chat-panel {
+  width: 35%; min-width: 320px; max-width: 480px;
+  display: flex; flex-direction: column; border-right: 1px solid var(--border);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(10,10,15,0.4);
+}
+.chat-header {
+  padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+  font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.message { display: flex; flex-direction: column; max-width: 85%; gap: 4px; }
+.message.user { align-self: flex-end; }
+.message.hermes { align-self: flex-start; }
+
+.message-bubble {
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+}
+.message.user .message-bubble {
+  background: var(--accent); color: #0a0a0f;
+  border-bottom-right-radius: 4px;
+}
+.message.hermes .message-bubble {
+  background: var(--surface); border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.message-time { font-size: 11px; color: var(--text-muted); padding: 0 4px; }
+
+.typing-indicator {
+  align-self: flex-start; display: flex; gap: 4px; padding: 12px 16px;
+  background: var(--surface); border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted);
+  animation: typing 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+.chat-input-area {
+  padding: 12px 20px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.chat-input-wrap {
+  display: flex; gap: 8px; align-items: flex-end;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 4px;
+  transition: border-color 0.2s;
+}
+.chat-input-wrap:focus-within { border-color: var(--accent); }
+.chat-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+  padding: 8px 12px; resize: none; max-height: 120px; line-height: 1.4;
+}
+.chat-input::placeholder { color: var(--text-muted); }
+.send-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: none;
+  background: var(--accent); color: #0a0a0f; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.send-btn:hover { background: #d97706; transform: scale(1.05); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* Overview Panel */
+.overview {
+  flex: 1; padding: 16px; overflow-y: auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  align-content: start;
+}
+.overview::-webkit-scrollbar { width: 4px; }
+.overview::-webkit-scrollbar-track { background: transparent; }
+.overview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  transition: all 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+.card-title {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 12px;
+}
+.card-full { grid-column: 1 / -1; }
+
+/* Office card */
+.office-status { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; }
+.office-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  background: var(--surface-hover); border: 1px solid var(--border);
+  color: var(--text); text-decoration: none; font-size: 13px; font-weight: 500;
+  transition: all 0.2s;
+}
+.office-link:hover { border-color: var(--accent); background: var(--accent-dim); }
+
+/* Projects */
+.project-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.project-item:last-child { border-bottom: none; }
+.project-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.project-dot.live { background: var(--green); }
+.project-dot.building { background: var(--amber); }
+.project-name { font-size: 14px; font-weight: 500; flex: 1; }
+.project-status { font-size: 11px; color: var(--text-muted); text-transform: capitalize; }
+
+/* Bots */
+.bot-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.bot-item:last-child { border-bottom: none; }
+.bot-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.bot-info { flex: 1; }
+.bot-name { font-size: 14px; font-weight: 500; }
+.bot-role { font-size: 11px; color: var(--text-muted); }
+.bot-status { font-size: 11px; }
+.bot-status.online { color: var(--green); }
+.bot-status.offline { color: var(--text-muted); }
+.spawn-btn {
+  margin-top: 8px; width: 100%; padding: 8px; border-radius: var(--radius-sm);
+  background: var(--surface-hover); border: 1px dashed var(--border);
+  color: var(--text-secondary); font-size: 13px; cursor: pointer;
+  transition: all 0.2s; font-family: 'Inter', sans-serif;
+}
+.spawn-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Activity Feed */
+.feed-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0; font-size: 13px;
+}
+.feed-time { color: var(--text-muted); font-size: 11px; flex-shrink: 0; min-width: 40px; font-variant-numeric: tabular-nums; }
+.feed-text { color: var(--text-secondary); line-height: 1.4; }
+
+/* Quick Actions */
+.quick-actions {
+  display: flex; gap: 8px; padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(10,10,15,0.6); flex-shrink: 0;
+}
+.action-btn {
+  padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-secondary); font-size: 13px;
+  cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: #1a1a2e; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; width: 400px; max-width: 90vw;
+}
+.modal h3 { font-size: 16px; margin-bottom: 16px; }
+.modal-input {
+  width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+  outline: none; margin-bottom: 16px;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-btn {
+  padding: 8px 20px; border-radius: var(--radius-sm); border: none;
+  font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer; font-weight: 500;
+  transition: all 0.2s;
+}
+.modal-btn.primary { background: var(--accent); color: #0a0a0f; }
+.modal-btn.primary:hover { background: #d97706; }
+.modal-btn.secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.modal-btn.secondary:hover { background: var(--surface-hover); }
+
+@media (max-width: 900px) {
+  .main { flex-direction: column; }
+  .chat-panel { width: 100%; min-width: 0; max-width: none; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
+  .overview { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <a href="/" class="header-logo">BS</a>
+      <span class="header-title">BookiStudio HQ</span>
+    </div>
+    <div class="header-right">
+      <span class="status-dot online" id="systemStatus" title="System Status"></span>
+      <span class="header-user"><span class="crown">👑</span> Adrien</span>
+      <span class="header-clock" id="clock">--:--</span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Chat Panel -->
+    <div class="chat-panel">
+      <div class="chat-header">💬 <span>Hermes</span></div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="message hermes">
+          <div class="message-bubble">Hey bro 👋 What are we building today?</div>
+          <span class="message-time">just now</span>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-wrap">
+          <textarea class="chat-input" id="chatInput" rows="1" placeholder="Message Hermes..." 
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 8L1 15L3.5 8L1 1Z" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview">
+      <!-- Office -->
+      <div class="card">
+        <div class="card-title">🏢 Office Live</div>
+        <div class="office-status">
+          <span class="status-dot online" id="officeStatus"></span>
+          <span id="officeStatusText">Connected</span>
+        </div>
+        <a href="https://office.bookistudios.com" target="_blank" class="office-link">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1L15 8L8 15L6.5 13.5L11 9H1V7H11L6.5 2.5L8 1Z" fill="currentColor"/></svg>
+          Visit Office
+        </a>
+      </div>
+
+      <!-- Projects -->
+      <div class="card">
+        <div class="card-title">📋 Active Projects</div>
+        <div class="project-item">
+          <span class="project-dot live"></span>
+          <span class="project-name">LoveFlix</span>
+          <span class="project-status">live</span>
+        </div>
+        <div class="project-item">
+          <span class="project-dot live"></span>
+          <span class="project-name">Bukimind Office</span>
+          <span class="project-status">live</span>
+        </div>
+        <div class="project-item">
+          <span class="project-dot live"></span>
+          <span class="project-name">BookiStudio AI</span>
+          <span class="project-status">live</span>
+        </div>
+      </div>
+
+      <!-- Bots -->
+      <div class="card" id="botsCard">
+        <div class="card-title">🤖 Employee Bots</div>
+        <div id="botsList">
+          <div class="bot-item">
+            <div class="bot-avatar" style="background:#8b5cf6;">I</div>
+            <div class="bot-info">
+              <div class="bot-name">Isabel</div>
+              <div class="bot-role">Marketing</div>
+            </div>
+            <span class="bot-status online">● online</span>
+          </div>
+          <div class="bot-item">
+            <div class="bot-avatar" style="background:#06b6d4;">D</div>
+            <div class="bot-info">
+              <div class="bot-name">Diane</div>
+              <div class="bot-role">Operations</div>
+            </div>
+            <span class="bot-status online">● online</span>
+          </div>
+        </div>
+        <button class="spawn-btn" onclick="showSpawnModal()">+ Spawn New Bot</button>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card card-full">
+        <div class="card-title">📡 Activity Feed</div>
+        <div id="feedContainer">
+          <div class="feed-item"><span class="feed-time" id="t1">--:--</span><span class="feed-text" id="f1">HQ Dashboard deployed</span></div>
+          <div class="feed-item"><span class="feed-time" id="t2">--:--</span><span class="feed-text" id="f2">Hermes bridge connected ✅</span></div>
+          <div class="feed-item"><span class="feed-time" id="t3">--:--</span><span class="feed-text" id="f3">System ready for commands</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button class="action-btn" onclick="showSpawnModal()">⚡ New Agent</button>
+    <button class="action-btn" onclick="showPipelineModal()">🚀 New Pipeline</button>
+    <button class="action-btn" onclick="showDeployModal()">📦 Deploy Project</button>
+  </div>
+
+  <!-- Spawn Bot Modal -->
+  <div class="modal-overlay" id="spawnModal">
+    <div class="modal">
+      <h3>🤖 Spawn New Employee Bot</h3>
+      <input class="modal-input" id="botNameInput" placeholder="Bot name..." autofocus>
+      <input class="modal-input" id="botRoleInput" placeholder="Role (e.g. Marketing, Ops, Dev)">
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeModal('spawnModal')">Cancel</button>
+        <button class="modal-btn primary" onclick="spawnBot()">Spawn</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline Modal -->
+  <div class="modal-overlay" id="pipelineModal">
+    <div class="modal">
+      <h3>🚀 New Pipeline</h3>
+      <input class="modal-input" id="pipelineInput" placeholder="Pipeline name...">
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeModal('pipelineModal')">Cancel</button>
+        <button class="modal-btn primary" onclick="startPipeline()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deploy Modal -->
+  <div class="modal-overlay" id="deployModal">
+    <div class="modal">
+      <h3>📦 Deploy Project</h3>
+      <input class="modal-input" id="deployInput" placeholder="Project name...">
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeModal('deployModal')">Cancel</button>
+        <button class="modal-btn primary" onclick="deployProject()">Deploy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const cdt = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+  document.getElementById('clock').textContent = 
+    cdt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── Time helper ──
+function nowTime() {
+  const now = new Date();
+  const cdt = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+  return cdt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+// ── Chat ──
+const SESSION_ID = 'hq-dashboard';
+let chatHistory = JSON.parse(localStorage.getItem('hqChatHistory') || '[]');
+let isProcessing = false;
+
+function addMessage(role, text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const time = nowTime();
+  div.innerHTML = `<div class="message-bubble">${text}</div><span class="message-time">${time}</span>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  chatHistory.push({ role, text, time });
+  localStorage.setItem('hqChatHistory', JSON.stringify(chatHistory));
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'typing-indicator';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || isProcessing) return;
+  
+  input.value = '';
+  input.style.height = 'auto';
+  addMessage('user', text);
+  
+  isProcessing = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+  
+  try {
+    const res = await fetch('/api/hermes/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, session_id: SESSION_ID })
+    });
+    const data = await res.json();
+    
+    // Poll for response (simple: try 3 times with 2s delay)
+    let response = null;
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      const pollRes = await fetch(`/api/hermes/messages/${SESSION_ID}`);
+      const pollData = await pollRes.json();
+      const msgs = pollData.messages || [];
+      const last = msgs[msgs.length - 1];
+      if (last && last.status === 'responded') {
+        response = last.response;
+        break;
+      }
+      // Also try direct by message_id
+      if (data.message_id) {
+        const msgRes = await fetch(`/api/hermes/message/${data.message_id}`);
+        if (msgRes.ok) {
+          const msgData = await msgRes.json();
+          if (msgData.status === 'responded') {
+            response = msgData.response;
+            break;
+          }
+        }
+      }
+    }
+    
+    hideTyping();
+    if (response) {
+      addMessage('hermes', response);
+    } else {
+      addMessage('hermes', 'Message received! I\'ll get back to you shortly bro 🤙');
+    }
+    addFeed('Message sent to Hermes');
+  } catch (err) {
+    hideTyping();
+    addMessage('hermes', '⚠️ Hermes bridge is offline. Try again in a bit.');
+  }
+  
+  isProcessing = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// ── Restore chat history ──
+function restoreChat() {
+  if (chatHistory.length > 0) {
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '';
+    chatHistory.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `message ${msg.role}`;
+      div.innerHTML = `<div class="message-bubble">${msg.text}</div><span class="message-time">${msg.time}</span>`;
+      container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+  }
+}
+restoreChat();
+
+// ── Feed ──
+function addFeed(text) {
+  const container = document.getElementById('feedContainer');
+  const div = document.createElement('div');
+  div.className = 'feed-item';
+  div.innerHTML = `<span class="feed-time">${nowTime()}</span><span class="feed-text">${text}</span>`;
+  container.prepend(div);
+  // Keep max 20 items
+  while (container.children.length > 20) container.removeChild(container.lastChild);
+}
+
+// Seed feed with live times
+setTimeout(() => {
+  document.getElementById('t1').textContent = nowTime();
+  document.getElementById('t2').textContent = nowTime();
+  document.getElementById('t3').textContent = nowTime();
+}, 100);
+
+// ── Poll office status ──
+async function checkOffice() {
+  try {
+    const res = await fetch('/api/hermes/health');
+    if (res.ok) {
+      document.getElementById('officeStatus').className = 'status-dot online';
+      document.getElementById('officeStatusText').textContent = 'Connected';
+      document.getElementById('systemStatus').className = 'status-dot online';
+    }
+  } catch {
+    document.getElementById('officeStatus').className = 'status-dot offline';
+    document.getElementById('officeStatusText').textContent = 'Offline';
+  }
+}
+checkOffice();
+setInterval(checkOffice, 30000);
+
+// ── Poll agents from Deerflow gateway ──
+async function pollAgents() {
+  try {
+    const res = await fetch('/api/agents');
+    if (res.ok) {
+      const data = await res.json();
+      // Update bot list if agents found
+    }
+  } catch {}
+}
+setInterval(pollAgents, 60000);
+
+// ── Modals ──
+function showSpawnModal() { document.getElementById('spawnModal').classList.add('active'); setTimeout(() => document.getElementById('botNameInput').focus(), 100); }
+function showPipelineModal() { document.getElementById('pipelineModal').classList.add('active'); setTimeout(() => document.getElementById('pipelineInput').focus(), 100); }
+function showDeployModal() { document.getElementById('deployModal').classList.add('active'); setTimeout(() => document.getElementById('deployInput').focus(), 100); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function spawnBot() {
+  const name = document.getElementById('botNameInput').value.trim();
+  const role = document.getElementById('botRoleInput').value.trim();
+  if (!name) return;
+  
+  const letter = name.charAt(0).toUpperCase();
+  const colors = ['#8b5cf6','#06b6d4','#f59e0b','#22c55e','#ef4444','#ec4899'];
+  const color = colors[document.querySelectorAll('.bot-item').length % colors.length];
+  
+  const list = document.getElementById('botsList');
+  const div = document.createElement('div');
+  div.className = 'bot-item';
+  div.innerHTML = `
+    <div class="bot-avatar" style="background:${color};">${letter}</div>
+    <div class="bot-info">
+      <div class="bot-name">${name}</div>
+      <div class="bot-role">${role || 'General'}</div>
+    </div>
+    <span class="bot-status online">● online</span>`;
+  list.appendChild(div);
+  
+  addFeed(`Spawned new bot: ${name}${role ? ' ('+role+')' : ''}`);
+  document.getElementById('botNameInput').value = '';
+  document.getElementById('botRoleInput').value = '';
+  closeModal('spawnModal');
+}
+
+function startPipeline() {
+  const name = document.getElementById('pipelineInput').value.trim();
+  if (!name) return;
+  addFeed(`🚀 Pipeline started: ${name}`);
+  document.getElementById('pipelineInput').value = '';
+  closeModal('pipelineModal');
+}
+
+function deployProject() {
+  const name = document.getElementById('deployInput').value.trim();
+  if (!name) return;
+  addFeed(`📦 Deploying: ${name}`);
+  document.getElementById('deployInput').value = '';
+  closeModal('deployModal');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+});
+</script>
+</body>
+</html>
