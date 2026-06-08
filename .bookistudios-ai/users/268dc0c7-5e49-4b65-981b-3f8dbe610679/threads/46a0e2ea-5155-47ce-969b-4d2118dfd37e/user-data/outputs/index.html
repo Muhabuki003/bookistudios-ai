@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starbucks® — Premium Coffee Experience Since 1971</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #1A0F0A;
+            color: #FDF6EE;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ===== VARIABLES ===== */
+        :root {
+            --espresso: #1A0F0A;
+            --dark-roast: #2C1810;
+            --medium-roast: #4A3228;
+            --coffee: #6F4E37;
+            --caramel: #D4A762;
+            --gold: #C8A45C;
+            --gold-light: #E8D5A3;
+            --cream: #FDF6EE;
+            --latte: #F5E6D3;
+            --matcha: #006241;
+            --matcha-light: #00A862;
+            --matcha-glow: rgba(0, 98, 65, 0.3);
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            line-height: 1.15;
+        }
+        h2 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            letter-spacing: -0.02em;
+        }
+        h3 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+        }
+        .section-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--caramel);
+            margin-bottom: 1rem;
+        }
+
+        /* ===== SECTION BASE ===== */
+        section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+        @media (min-width: 768px) {
+            section { padding: 8rem 3rem; }
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ===== NOISE OVERLAY ===== */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ===== SCROLL REVEAL ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.25s; }
+        .reveal-delay-3 { transition-delay: 0.4s; }
+
+        /* ================================================================
+                   HERO
+                ================================================================ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(170deg, #1A0F0A 0%, #2C1810 40%, #3D2218 70%, #1A0F0A 100%);
+            padding: 2rem;
+        }
+        /* Golden beam */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            left: 50%;
+            width: 120%;
+            max-width: 900px;
+            aspect-ratio: 1 / 0.6;
+            transform: translateX(-50%) rotate(-8deg);
+            background: radial-gradient(ellipse at center,
+                rgba(200, 164, 92, 0.15) 0%,
+                rgba(200, 164, 92, 0.06) 40%,
+                transparent 70%);
+            pointer-events: none;
+            animation: beamPulse 6s ease-in-out infinite;
+        }
+        @keyframes beamPulse {
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) rotate(-8deg) scaleY(1); }
+            50% { opacity: 1; transform: translateX(-50%) rotate(-8deg) scaleY(1.15); }
+        }
+        /* Warm glow bottom */
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40%;
+            background: linear-gradient(to top, rgba(26,15,10,0.95) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Decorative floating particles */
+        .particle-field {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--caramel);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatParticle 8s ease-in-out infinite;
+        }
+        .particle:nth-child(1) { left: 15%; bottom: 20%; animation-delay: 0s; animation-duration: 7s; }
+        .particle:nth-child(2) { left: 35%; bottom: 40%; animation-delay: 1.2s; animation-duration: 9s; width: 3px; height: 3px; }
+        .particle:nth-child(3) { left: 55%; bottom: 30%; animation-delay: 2.5s; animation-duration: 8s; }
+        .particle:nth-child(4) { left: 75%; bottom: 50%; animation-delay: 0.8s; animation-duration: 10s; width: 5px; height: 5px; }
+        .particle:nth-child(5) { left: 25%; bottom: 60%; animation-delay: 3.5s; animation-duration: 7.5s; }
+        .particle:nth-child(6) { left: 65%; bottom: 15%; animation-delay: 4.2s; animation-duration: 8.5s; width: 3px; height: 3px; }
+        .particle:nth-child(7) { left: 45%; bottom: 70%; animation-delay: 1.8s; animation-duration: 9.5s; }
+        .particle:nth-child(8) { left: 85%; bottom: 35%; animation-delay: 3s; animation-duration: 8s; width: 6px; height: 6px; }
+
+        @keyframes floatParticle {
+            0% { opacity: 0; transform: translateY(0) scale(0); }
+            10% { opacity: 0.8; transform: translateY(-20px) scale(1); }
+            90% { opacity: 0.4; transform: translateY(-180px) scale(0.6); }
+            100% { opacity: 0; transform: translateY(-220px) scale(0); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--caramel);
+            border: 1px solid rgba(212, 167, 98, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 100px;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: fadeSlideUp 1s ease 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(4rem, 12vw, 10rem);
+            font-weight: 700;
+            font-style: italic;
+            color: var(--cream);
+            letter-spacing: -0.04em;
+            line-height: 0.9;
+            opacity: 0;
+            animation: fadeSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+        }
+        .hero-title span {
+            display: block;
+            color: transparent;
+            -webkit-text-stroke: 1.5px rgba(253, 246, 238, 0.25);
+            font-style: normal;
+            font-weight: 400;
+            font-size: 0.35em;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        .hero-divider {
+            width: 60px;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, var(--caramel), transparent);
+            margin: 2.5rem auto;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease 1s forwards;
+        }
+
+        .hero-sub {
+            font-size: clamp(1rem, 1.6vw, 1.4rem);
+            font-weight: 300;
+            color: rgba(245, 230, 211, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease 1.3s forwards;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-scroll {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease 2s forwards;
+        }
+        .hero-scroll a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(212, 167, 98, 0.5);
+            text-decoration: none;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .hero-scroll a:hover { color: var(--caramel); }
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--caramel), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.3); }
+        }
+
+        @keyframes fadeSlideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================================================================
+                   STORY
+                ================================================================ */
+        .story {
+            background: linear-gradient(180deg, #1A0F0A 0%, #2C1810 100%);
+        }
+        .story-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        @media (min-width: 768px) {
+            .story-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 5rem;
+            }
+        }
+
+        .story-text p {
+            color: rgba(245, 230, 211, 0.75);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .story-years {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .year-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(212, 167, 98, 0.1);
+            border-radius: 16px;
+            padding: 1.75rem 1.5rem;
+            transition: all 0.4s ease;
+        }
+        .year-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(212, 167, 98, 0.25);
+            transform: translateY(-3px);
+        }
+        .year-card .year {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--caramel);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .year-card .event {
+            font-size: 0.85rem;
+            color: rgba(245, 230, 211, 0.6);
+            line-height: 1.5;
+        }
+
+        /* ================================================================
+                   SIGNATURE DRINKS
+                ================================================================ */
+        .drinks {
+            background: #2C1810;
+        }
+        .drinks-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .drinks-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 600px) {
+            .drinks-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 900px) {
+            .drinks-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .drink-card {
+            background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid rgba(212, 167, 98, 0.08);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        .drink-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--caramel), transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .drink-card:hover::before { opacity: 1; }
+        .drink-card:hover {
+            transform: translateY(-8px);
+            background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+            border-color: rgba(212, 167, 98, 0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .drink-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            filter: drop-shadow(0 4px 12px rgba(200, 164, 92, 0.15));
+        }
+        .drink-card h3 {
+            font-size: 1.4rem;
+            color: var(--cream);
+            margin-bottom: 0.5rem;
+        }
+        .drink-card .drink-sub {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--caramel);
+            margin-bottom: 1rem;
+        }
+        .drink-card p {
+            font-size: 0.9rem;
+            color: rgba(245, 230, 211, 0.55);
+            line-height: 1.7;
+        }
+
+        /* ================================================================
+                   PHILOSOPHY
+                ================================================================ */
+        .philosophy {
+            background: linear-gradient(170deg, #2C1810 0%, #1A0F0A 100%);
+            text-align: center;
+            overflow: hidden;
+        }
+        .philosophy .container {
+            position: relative;
+        }
+        .philosophy blockquote {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+        .philosophy blockquote p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            color: var(--cream);
+            line-height: 1.35;
+            font-weight: 400;
+        }
+        .philosophy blockquote cite {
+            display: block;
+            margin-top: 1.5rem;
+            font-family: 'DM Sans', sans-serif;
+            font-style: normal;
+            font-size: 0.9rem;
+            color: var(--caramel);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+        }
+        .philosophy-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 4rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--caramel);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(245, 230, 211, 0.4);
+            margin-top: 0.5rem;
+        }
+
+        /* Decorative ring */
+        .philosophy-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            max-width: 800px;
+            aspect-ratio: 1;
+            border: 1px solid rgba(212, 167, 98, 0.04);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: ringRotate 30s linear infinite;
+        }
+        .philosophy-ring-2 {
+            width: 90%;
+            border-color: rgba(212, 167, 98, 0.025);
+            animation-duration: 40s;
+            animation-direction: reverse;
+        }
+        @keyframes ringRotate {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* ================================================================
+                   FOOTER
+                ================================================================ */
+        footer {
+            background: #1A0F0A;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(212, 167, 98, 0.06);
+        }
+        footer .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        footer .brand-line {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 0.9rem;
+            color: rgba(245, 230, 211, 0.3);
+        }
+        footer .brand-line span {
+            color: rgba(200, 164, 92, 0.4);
+        }
+        footer .copyright {
+            font-size: 0.7rem;
+            color: rgba(245, 230, 211, 0.15);
+            letter-spacing: 0.05em;
+        }
+
+        /* ===== DEERFLOW BADGE ===== */
+        .deerflow-badge {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(26, 15, 10, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 167, 98, 0.12);
+            border-radius: 100px;
+            text-decoration: none;
+            color: rgba(245, 230, 211, 0.4);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease 2.5s forwards;
+        }
+        .deerflow-badge:hover {
+            background: rgba(26, 15, 10, 0.9);
+            border-color: rgba(212, 167, 98, 0.3);
+            color: var(--caramel);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .deerflow-badge .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--caramel);
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .deerflow-badge:hover .badge-dot {
+            opacity: 1;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .story-years { grid-template-columns: 1fr; }
+            .philosophy-stats { grid-template-columns: 1fr; gap: 1.5rem; }
+            .drink-card { padding: 2rem 1.5rem; }
+            .hero-title { font-size: clamp(3rem, 15vw, 5rem); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Noise Overlay -->
+    <div class="noise"></div>
+
+    <!-- ============================================================
+    HERO
+    ============================================================ -->
+    <section class="hero" id="top">
+        <div class="particle-field">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-badge">Est. 1971 · Seattle</div>
+            <h1 class="hero-title">
+                Starbucks
+                <span>coffee &amp; connection</span>
+            </h1>
+            <div class="hero-divider"></div>
+            <p class="hero-sub">
+                In every cup, a world of warmth. For over five decades, we've been crafting more than coffee — we've been crafting moments of human connection.
+            </p>
+        </div>
+
+        <div class="hero-scroll">
+            <a href="#story">
+                <span>Explore</span>
+                <div class="scroll-line"></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    STORY
+    ============================================================ -->
+    <section class="story" id="story">
+        <div class="container">
+            <div class="reveal">
+                <span class="section-label">Our Story</span>
+            </div>
+            <div class="story-grid">
+                <div class="story-text reveal reveal-delay-1">
+                    <h2>From Pike Place to the world</h2>
+                    <p>
+                        Starbucks was born in 1971, on the cobblestone streets of Seattle's historic Pike Place Market. 
+                        Founded by three coffee enthusiasts — Jerry Baldwin, Zev Siegl, and Gordon Bowker — our mission 
+                        was simple: bring the world's finest coffee to the people who love it.
+                    </p>
+                    <p>
+                        In 1987, Howard Schultz joined and transformed our vision — inspired by the espresso bars of Milan, 
+                        he created a "third place" between home and work, where community and connection brew as richly 
+                        as our coffee.
+                    </p>
+                </div>
+                <div class="story-years reveal reveal-delay-2">
+                    <div class="year-card">
+                        <div class="year">1971</div>
+                        <div class="event">First store opens at Pike Place Market, Seattle — selling whole-bean coffee</div>
+                    </div>
+                    <div class="year-card">
+                        <div class="year">1987</div>
+                        <div class="event">Howard Schultz acquires Starbucks and introduces the espresso bar concept</div>
+                    </div>
+                    <div class="year-card">
+                        <div class="year">1992</div>
+                        <div class="event">Starbucks goes public — 165 stores across North America</div>
+                    </div>
+                    <div class="year-card">
+                        <div class="year">Today</div>
+                        <div class="event">Over 38,000 stores worldwide, serving millions daily</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    SIGNATURE DRINKS
+    ============================================================ -->
+    <section class="drinks" id="drinks">
+        <div class="container">
+            <div class="drinks-header reveal">
+                <span class="section-label">Signature Creations</span>
+                <h2>Crafted to perfection</h2>
+                <p style="color: rgba(245, 230, 211, 0.5); max-width: 540px; margin: 1rem auto 0; font-size: 0.95rem;">
+                    Every drink tells a story — from our classic handcrafted espresso to seasonal innovations 
+                    that define coffee culture around the globe.
+                </p>
+            </div>
+
+            <div class="drinks-grid">
+                <div class="drink-card reveal reveal-delay-1">
+                    <span class="drink-icon">☕</span>
+                    <h3>Caffè Latte</h3>
+                    <div class="drink-sub">The Classic</div>
+                    <p>Rich espresso meets velvety steamed milk in perfect harmony. Our most beloved tradition — simple, elegant, timeless.</p>
+                </div>
+                <div class="drink-card reveal reveal-delay-2">
+                    <span class="drink-icon">✨</span>
+                    <h3>Caramel Macchiato</h3>
+                    <div class="drink-sub">The Icon</div>
+                    <p>Freshly steamed vanilla-scented milk marked with espresso and a crosshatch of buttery caramel — layered, beautiful, unforgettable.</p>
+                </div>
+                <div class="drink-card reveal reveal-delay-3">
+                    <span class="drink-icon">🧊</span>
+                    <h3>Nitro Cold Brew</h3>
+                    <div class="drink-sub">The Modern Classic</div>
+                    <p>Small-batch cold brew slowly steeped for 20 hours, infused with nitrogen for a creamy, silky-smooth finish — no ice required.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    PHILOSOPHY
+    ============================================================ -->
+    <section class="philosophy">
+        <div class="container">
+            <div class="philosophy-ring"></div>
+            <div class="philosophy-ring philosophy-ring-2"></div>
+
+            <div class="reveal">
+                <span class="section-label">Our Philosophy</span>
+            </div>
+
+            <blockquote class="reveal reveal-delay-1">
+                <p>"It's not just coffee. It's the warmth of a welcome, the comfort of a familiar ritual, and the promise that in every cup, there's a moment of humanity."</p>
+                <cite>— Inspired by every barista, every store, every cup</cite>
+            </blockquote>
+
+            <div class="philosophy-stats reveal reveal-delay-2">
+                <div class="stat">
+                    <div class="stat-number">38K+</div>
+                    <div class="stat-label">Stores Worldwide</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">100M+</div>
+                    <div class="stat-label">Weekly Customers</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Years of Craft</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    FOOTER
+    ============================================================ -->
+    <footer>
+        <div class="container reveal">
+            <div class="brand-line">Starbucks<span>®</span></div>
+            <p class="copyright">© 2026 Starbucks Coffee Company. All rights reserved. This is a fan tribute site.</p>
+        </div>
+    </footer>
+
+    <!-- ===== DEERFLOW BADGE ===== -->
+    <a href="https://deerflow.tech" target="_blank" class="deerflow-badge" title="Created By Deerflow">
+        <span class="badge-dot"></span>
+        Created by Deerflow
+    </a>
+
+    <!-- ===== SCROLL REVEAL SCRIPT ===== -->
+    <script>
+        (function() {
+            const reveals = document.querySelectorAll('.reveal');
+            if (!reveals.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        // Optionally unobserve after reveal
+                        // observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.15,
+                rootMargin: '0px 0px -60px 0px'
+            });
+
+            reveals.forEach(el => observer.observe(el));
+
+            // Check any already in view on load
+            window.addEventListener('load', () => {
+                reveals.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight) {
+                        el.classList.add('visible');
+                    }
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>

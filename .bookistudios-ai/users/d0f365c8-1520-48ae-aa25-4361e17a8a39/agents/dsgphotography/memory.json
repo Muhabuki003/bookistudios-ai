@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T07:18:23.517900Z",
+  "user": {
+    "workContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "personalContext": {
+      "summary": "User's name is Tara. Likely Filipino or appreciates Filipino culture based on assistant's use of 'kababayan' and 'pusong totoo'.",
+      "updatedAt": "2026-06-08T07:14:50.252209Z"
+    },
+    "topOfMind": {
+      "summary": "Currently interested in DSG Photography, specifically inquiring about pricing and the photographer's location (Wichita, Kansas). Possibly considering booking a session.",
+      "updatedAt": "2026-06-08T07:16:42.971794Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_33ca2465",
+      "content": "User's name is Tara.",
+      "category": "context",
+      "confidence": 0.9,
+      "createdAt": "2026-06-08T07:14:50.252209Z",
+      "source": "5e81368f-cca9-43aa-a299-73a11c0ac0aa"
+    },
+    {
+      "id": "fact_b412b80f",
+      "content": "User is interested in DSG Photography pricing.",
+      "category": "preference",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T07:14:50.252209Z",
+      "source": "5e81368f-cca9-43aa-a299-73a11c0ac0aa"
+    },
+    {
+      "id": "fact_e01f39c0",
+      "content": "User likely has Filipino background or appreciation for Filipino culture.",
+      "category": "context",
+      "confidence": 0.7,
+      "createdAt": "2026-06-08T07:14:50.252209Z",
+      "source": "5e81368f-cca9-43aa-a299-73a11c0ac0aa"
+    }
+  ]
+}

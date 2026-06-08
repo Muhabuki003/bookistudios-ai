@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T03:43:44.134948Z",
+  "user": {
+    "workContext": {
+      "summary": "Isabel is a collaborator on the LoveFlix project (under BookiStudios), working alongside founder Adrien. She is focused on integrating Notion for workflow and note-sharing, and recently investigated connecting the assistant to Notion via Notion MCP (OAuth).",
+      "updatedAt": "2026-06-08T03:43:44.131923Z"
+    },
+    "personalContext": {
+      "summary": "User's name is Isabel.",
+      "updatedAt": "2026-06-08T02:56:44.069112Z"
+    },
+    "topOfMind": {
+      "summary": "Interested in LoveFlix project; actively exploring connecting the assistant to Notion for workflow integration. Wants to set up a dedicated Notion folder for LoveFlix notes to be referenced by Adrien and his AI agent. Recently investigated Notion MCP (Hosted MCP Server with OAuth) as a potential connection method. Continues to refine the assistant's understanding of her identity (recently corrected assistant who assumed she was Adrien).",
+      "updatedAt": "2026-06-08T03:43:44.131923Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "Isabel is involved with LoveFlix development, focusing on marketing and workflow integration. Previously explored connecting the assistant to Notion for note-sharing with Adrien. Now investigating Notion MCP (Hosted MCP Server with OAuth) as a method to connect the assistant to Notion pages. She wants a dedicated LoveFlix folder where the assistant can output notes and ideas for easy reference by Adrien and his AI agent.",
+      "updatedAt": "2026-06-08T03:43:44.131923Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_23207112",
+      "content": "User's name is Isabel.",
+      "category": "context",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T02:56:44.069112Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393"
+    },
+    {
+      "id": "fact_97bf1c80",
+      "content": "Isabel wants to connect the assistant to Notion for workflow integration.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-08T02:56:44.069112Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393"
+    },
+    {
+      "id": "fact_bdb53c92",
+      "content": "The assistant incorrectly assumed the user was Adrien; user corrected that they are Isabel.",
+      "category": "correction",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T02:56:44.069112Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393",
+      "sourceError": "Assistant assumed user was Adrien based on previous memory."
+    },
+    {
+      "id": "fact_b31fc955",
+      "content": "Isabel wants to set up a dedicated Notion folder for LoveFlix notes that can be referenced by Adrien and his AI agent.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T03:03:58.366392Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393"
+    },
+    {
+      "id": "fact_aecc15dd",
+      "content": "The assistant again incorrectly assumed the user was Adrien in this conversation; user corrected that they are Isabel.",
+      "category": "correction",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T03:03:58.366392Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393",
+      "sourceError": "Assistant saw 'LoveFlix' and assumed user was Adrien, but user is Isabel."
+    },
+    {
+      "id": "fact_770ce3c6",
+      "content": "Isabel wants to connect the assistant to Notion using Notion's MCP (Hosted MCP Server with OAuth) for LoveFlix note-sharing.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T03:43:44.131923Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393"
+    },
+    {
+      "id": "fact_fef97518",
+      "content": "Isabel wants a dedicated Notion folder for LoveFlix where the assistant can output notes and ideas that can be easily referenced by Adrien and his AI agent.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T03:43:44.131923Z",
+      "source": "e2021eb4-e210-48c4-9ee9-1304ec1ec393"
+    }
+  ]
+}

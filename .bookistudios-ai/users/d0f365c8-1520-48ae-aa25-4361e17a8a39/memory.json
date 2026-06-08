@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T07:19:33.620031Z",
+  "user": {
+    "workContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "personalContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "topOfMind": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_3d2c2184",
+      "content": "The user corrected the assistant's interpretation of 'Adrien' to refer to Adrien Muhabuki, founder/owner of BookiStudios (creator of this AI).",
+      "category": "correction",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T07:19:33.619442Z",
+      "source": "930575b3-41d3-46fd-a6ce-ede54c78efe5",
+      "sourceError": "Assistant initially listed Adrien Brody, Adrien Broner, and a fictional character as possibilities."
+    }
+  ]
+}

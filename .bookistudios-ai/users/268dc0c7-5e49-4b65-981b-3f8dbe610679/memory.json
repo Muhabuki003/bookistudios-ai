@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T14:50:19.983482Z",
+  "user": {
+    "workContext": {
+      "summary": "User uses Deerflow AI agent platform by BookiStudios.",
+      "updatedAt": "2026-06-08T14:45:20.543986Z"
+    },
+    "personalContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "topOfMind": {
+      "summary": "The user has completed building a custom Notion integration skill for Deerflow, consisting of a SKILL.md definition and a Python CLI script for the Notion API. The skill is ready for testing, but there is a deployment constraint: write permission to the default skills directory was denied, requiring alternative packaging. The next steps are for the user to create a Notion API key, share a database with the integration, and then package the skill for installation. The user is also interested in the Deerflow platform's background and its founder Adrien (Muhabuki).",
+      "updatedAt": "2026-06-08T14:50:19.980056Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "The user inquired about Adrien (founder of BookiStudios) and the Deerflow platform. After discussing the inability to use MCP for Notion integration, the user chose to build a custom Notion skill inside Deerflow. The assistant created a SKILL.md definition and a Python CLI script (notion_api.py) for the Notion API. A deployment issue was encountered: write permission to /mnt/skills/custom/ was denied, so alternative packaging is needed. The skill covers 8 operations and is ready for the user to test with their Notion API key.",
+      "updatedAt": "2026-06-08T14:50:19.980056Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_e2ecf615",
+      "content": "The user is using Deerflow, the AI agent platform by BookiStudios.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:43:41.647702Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_d4219c78",
+      "content": "The user wants to connect Notion to their Deerflow AI account, similar to custom connectors in Claude.",
+      "category": "goal",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:45:20.543986Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_3762fa0c",
+      "content": "Deerflow (BookiStudios) does not currently support MCP connections like Claude Desktop.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:45:20.543986Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_8ca2a632",
+      "content": "The assistant offered to build a custom Notion skill using the Notion API as an alternative to MCP.",
+      "category": "context",
+      "confidence": 0.9,
+      "createdAt": "2026-06-08T14:45:20.543986Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_5db06f0e",
+      "content": "The skill definition file is located at `/mnt/user-data/workspace/notion-integration/SKILL.md`.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:50:19.980056Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_242d8cf9",
+      "content": "A Python helper script `notion_api.py` was created at `/mnt/user-data/workspace/notion-integration/scripts/notion_api.py` for CLI access to Notion REST API.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:50:19.980056Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_81f69b8a",
+      "content": "Write permission to `/mnt/skills/custom/` was denied, requiring alternative deployment (e.g., using `package_skill.py` with flags or user intervention).",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:50:19.980056Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_2872cab8",
+      "content": "The skill covers 8 operations: query databases, read pages, create/update pages, append blocks, search, list users, and more.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:50:19.980056Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_32af0764",
+      "content": "The user is following a development cycle: SKILL.md draft → test → eval → iterate.",
+      "category": "behavior",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:50:19.980056Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    }
+  ]
+}

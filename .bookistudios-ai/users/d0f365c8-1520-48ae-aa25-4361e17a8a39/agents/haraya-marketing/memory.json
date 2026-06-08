@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T06:49:19.981146Z",
+  "user": {
+    "workContext": {
+      "summary": "Founder of Haraya, a clothing brand under BookiStudios. Currently working on defining the brand's specs and design, which is Filipino-inspired streetwear with elegance and class.",
+      "updatedAt": "2026-06-08T06:36:51.917648Z"
+    },
+    "personalContext": {
+      "summary": "Also known as Muhabuki. Creative director for the brand Haraya. User is Filipino.",
+      "updatedAt": "2026-06-08T06:36:51.917648Z"
+    },
+    "topOfMind": {
+      "summary": "Seeking feedback on the specs and design of the Haraya clothing line. Focused on refining the brand identity and product details, specifically a Filipino-inspired streetwear design with elegance and class. Tagline: 'fruits of one imagination'. Collaborating with marketing lead Diane.",
+      "updatedAt": "2026-06-08T06:36:51.917648Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "User has specified that the Haraya design is Filipino-inspired streetwear with elegance and class, and confirmed personal Filipino ethnicity.",
+      "updatedAt": "2026-06-08T06:36:51.917648Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_ecb964c2",
+      "content": "User is Adrien (Muhabuki), founder of the clothing brand Haraya.",
+      "category": "context",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T06:34:35.502276Z",
+      "source": "e2b52365-f203-484e-bc49-e143690bb64a"
+    },
+    {
+      "id": "fact_8de2c3c0",
+      "content": "Haraya is a clothing brand under BookiStudios.",
+      "category": "context",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T06:34:35.502276Z",
+      "source": "e2b52365-f203-484e-bc49-e143690bb64a"
+    },
+    {
+      "id": "fact_85c085c9",
+      "content": "Tagline of Haraya: 'fruits of one imagination'.",
+      "category": "knowledge",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T06:34:35.502276Z",
+      "source": "e2b52365-f203-484e-bc49-e143690bb64a"
+    },
+    {
+      "id": "fact_5fe4f1a0",
+      "content": "Diane is the marketing lead for Haraya.",
+      "category": "context",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T06:34:35.502276Z",
+      "source": "e2b52365-f203-484e-bc49-e143690bb64a"
+    },
+    {
+      "id": "fact_5ce3cb74",
+      "content": "User is Filipino.",
+      "category": "context",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T06:36:51.917648Z",
+      "source": "e2b52365-f203-484e-bc49-e143690bb64a"
+    },
+    {
+      "id": "fact_960cdcd7",
+      "content": "Haraya's design direction is Filipino-inspired streetwear with elegance and class.",
+      "category": "context",
+      "confidence": 0.9,
+      "createdAt": "2026-06-08T06:36:51.917648Z",
+      "source": "e2b52365-f203-484e-bc49-e143690bb64a"
+    }
+  ]
+}

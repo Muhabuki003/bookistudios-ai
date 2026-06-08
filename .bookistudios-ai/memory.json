@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T14:47:32.086671Z",
+  "user": {
+    "workContext": {
+      "summary": "User is Adrien (Muhabuki), Founder & CEO of BookiStudios (BUKIMIND), which runs platforms including LoveFlix, Deerflow, and BookiStudios AI.",
+      "updatedAt": "2026-06-08T14:46:42.659164Z"
+    },
+    "personalContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "topOfMind": {
+      "summary": "User is actively building a custom Notion skill within Deerflow/BookiStudios AI to connect to their Notion workspace, using the Notion API and existing web fetch/file tools. This replaces the earlier attempt to set up an MCP server, as the platform does not support MCP. User also has a goal to create a video about a cat running down the street. Additionally, as Founder & CEO of BookiStudios, user oversees LoveFlix, Deerflow, and BookiStudios AI platforms.",
+      "updatedAt": "2026-06-08T14:47:32.082684Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "User has a goal to create a video about a cat running down the street. In recent conversations, user confirmed tools are active and initiated a request to connect Notion to their Deerflow/Bookistudios account. Initial attempts to set up a custom MCP server failed because the platform does not support MCP connections. User considered two approaches: building a custom Notion skill within Deerflow using existing tools, or building a standalone MCP server. User decided to proceed with Option 1 (building a Notion skill inside Deerflow) and provided a summary of the conversation to guide implementation.",
+      "updatedAt": "2026-06-08T14:47:32.082684Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "User is the founder and CEO of BookiStudios (BUKIMIND), overseeing products like LoveFlix, Deerflow, and BookiStudios AI.",
+      "updatedAt": "2026-06-08T14:46:42.659164Z"
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_f7a80757",
+      "content": "User wants to create a video about a cat running down the street.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T00:19:18.266869Z",
+      "source": "c986baca-d13d-4880-a2ab-1d8dbfe2fb3a"
+    },
+    {
+      "id": "fact_45c240d3",
+      "content": "User wants to set up a custom MCP server to connect Notion to their Deerflow/Bookistudios account.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T14:46:00.457629Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_051f3f73",
+      "content": "User is Adrien (Muhabuki), Founder & CEO of BookiStudios (BUKIMIND), which includes LoveFlix, Deerflow, and BookiStudios AI.",
+      "category": "context",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T14:46:42.659164Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_7bfa74a9",
+      "content": "Deerflow/Bookistudios AI platform does not currently support MCP connections (no MCP server/client config mechanism).",
+      "category": "knowledge",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:46:42.659164Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_d3821264",
+      "content": "Web search and file tools are fully operational in the Deerflow/Bookistudios AI environment.",
+      "category": "context",
+      "confidence": 0.95,
+      "createdAt": "2026-06-08T14:46:42.659164Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    },
+    {
+      "id": "fact_20b565a9",
+      "content": "User opted to build a custom Notion skill within Deerflow/BookiStudios AI using the Notion API, instead of setting up an MCP server.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T14:47:32.082684Z",
+      "source": "09f301b5-c729-491f-ba2f-714e33109718"
+    }
+  ]
+}

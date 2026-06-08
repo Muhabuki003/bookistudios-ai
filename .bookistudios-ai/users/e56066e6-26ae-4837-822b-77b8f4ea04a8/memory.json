@@ -1,0 +1,114 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-06-08T18:25:03.385919Z",
+  "user": {
+    "workContext": {
+      "summary": "User continues work on generating a cat running video, building a reusable skill with skill-creator, designing a custom agent named 'work', and engaging with LoveFlix (BookiStudios' private streaming platform). Now also developing a social media content strategy for LoveFlix using authentic personal footage and AI-generated visuals, centered on human connection and nostalgia.",
+      "updatedAt": "2026-06-08T18:25:03.374942Z"
+    },
+    "personalContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "topOfMind": {
+      "summary": "User is actively designing the 'work' agent's purpose and SOUL.md with assistant help. They are also working on a social media posting schedule for LoveFlix rooted in human connection and nostalgia. Recently they shared personal footage from their sister (getting ready for a date, lying in bed on phone, on FT) to be used in LoveFlix ads, and they want AI-generated elements that blend seamlessly with sentimental videos (couples, mom content) without feeling like a commercial. Other ongoing projects include generating a cat running video, building a reusable skill with skill-creator, and following up on LoveFlix infrastructure (API endpoint for waitlist, BUKIMIND Office).",
+      "updatedAt": "2026-06-08T18:25:03.374942Z"
+    }
+  },
+  "history": {
+    "recentMonths": {
+      "summary": "User continued exploring Loveflix, asking for its waitlist size, then requested help to set up an API endpoint to check waitlist data from the Loveflix backend. They also asked about the BUKIMIND Office link, expanding their interest in the Loveflix ecosystem. The cat video generation and skill-creator projects remain ongoing. Recently, user began designing a custom agent named 'work' to serve as a focused productivity partner, with a SOUL.md being drafted. Now user is shifting to a social media posting strategy for LoveFlix, using authentic footage from their sister (getting ready for a date, on FT, etc.) and planning AI-generated visuals that avoid a commercial feel, integrating with existing sentimental compilations.",
+      "updatedAt": "2026-06-08T18:25:03.374942Z"
+    },
+    "earlierContext": {
+      "summary": "",
+      "updatedAt": ""
+    },
+    "longTermBackground": {
+      "summary": "",
+      "updatedAt": ""
+    }
+  },
+  "facts": [
+    {
+      "id": "fact_784f8101",
+      "content": "User has started building a new skill using `skill-creator`, currently in the initial brainstorming phase to define what the skill should do.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T00:27:12.266775Z",
+      "source": "22d37290-b855-420f-84f5-b52eb9d3f198"
+    },
+    {
+      "id": "fact_75f0c7ca",
+      "content": "LoveFlix is BookiStudios' private, invite-only streaming platform, founded by Adrien (Muhabuki) with marketing lead Isabel, built on AWS (EC2, S3, Cloudflare, Windows EC2 with Visual Basic Community 2019), using a React/Next.js style frontend.",
+      "category": "context",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T01:09:26.144706Z",
+      "source": "a73867de-c6aa-4efd-95ca-1074de1a8846"
+    },
+    {
+      "id": "fact_b9b1bd8f",
+      "content": "User wants to set up an API endpoint to check waitlist data for Loveflix.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T01:11:51.152590Z",
+      "source": "a73867de-c6aa-4efd-95ca-1074de1a8846"
+    },
+    {
+      "id": "fact_28ee9e1e",
+      "content": "User is interested in the BUKIMIND Office link, asking for it.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-08T01:11:51.152590Z",
+      "source": "a73867de-c6aa-4efd-95ca-1074de1a8846"
+    },
+    {
+      "id": "fact_9d0c6d4e",
+      "content": "BUKIMIND Office is a virtual office/workspace platform that operates alongside LoveFlix, mentioned in the LoveFlix knowledge base.",
+      "category": "context",
+      "confidence": 0.8,
+      "createdAt": "2026-06-08T01:11:51.152590Z",
+      "source": "a73867de-c6aa-4efd-95ca-1074de1a8846"
+    },
+    {
+      "id": "fact_8d7e575f",
+      "content": "User is designing a custom agent named 'work' to serve as a focused productivity and execution partner for project-based work, with a SOUL.md being drafted.",
+      "category": "goal",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T05:23:24.101441Z",
+      "source": "3e0a5794-3272-4f29-9d32-60c95d7ba509"
+    },
+    {
+      "id": "fact_927bfc2a",
+      "content": "User is planning a social media posting schedule for LoveFlix based on human connection and nostalgia, while keeping LoveFlix as the brand.",
+      "category": "goal",
+      "confidence": 0.9,
+      "createdAt": "2026-06-08T18:22:00.433511Z",
+      "source": "3e0a5794-3272-4f29-9d32-60c95d7ba509"
+    },
+    {
+      "id": "fact_d7b5e50b",
+      "content": "User has personal footage from their sister: getting ready for a date, lying in bed on phone, and on FaceTime, intended for LoveFlix social media content.",
+      "category": "context",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T18:25:03.374942Z",
+      "source": "3e0a5794-3272-4f29-9d32-60c95d7ba509"
+    },
+    {
+      "id": "fact_dd99882c",
+      "content": "User wants AI-generated elements for LoveFlix ads that do not feel commercial, and should blend with sentimental videos of couples and mom content compilations they have.",
+      "category": "preference",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T18:25:03.374942Z",
+      "source": "3e0a5794-3272-4f29-9d32-60c95d7ba509"
+    },
+    {
+      "id": "fact_843bd7e7",
+      "content": "User has compilations of sentimental videos of couples and mom content that they plan to use in LoveFlix social media.",
+      "category": "context",
+      "confidence": 1.0,
+      "createdAt": "2026-06-08T18:25:03.374942Z",
+      "source": "3e0a5794-3272-4f29-9d32-60c95d7ba509"
+    }
+  ]
+}
