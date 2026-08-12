@@ -18,6 +18,20 @@ test.describe("Pricing", () => {
     ).toBeVisible();
   });
 
+  test("is reachable from the hero call to action", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("link", { name: "See pricing" }).click();
+
+    await page.waitForURL("**/pricing");
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /Run the harness yourself/,
+      }),
+    ).toBeVisible();
+  });
+
   test("header Docs link points at the GitHub repository", async ({ page }) => {
     await page.goto("/pricing");
 
