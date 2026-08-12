@@ -1,88 +1,173 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getMaxYearlyDiscountPercent,
-  getPlanAmount,
-  getYearlyDiscountPercent,
-  PLANS,
-  type Plan,
+  COMPARISON_COLUMNS,
+  COMPARISON_ROWS,
+  computeTotals,
+  describeLineItem,
+  isPaidPlanId,
+  MAX_SEATS,
+  money,
+  nextRenewalDate,
+  normalizeCycle,
+  normalizeSeats,
+  PAID_PLANS,
+  resolvePromo,
+  TIERS,
 } from "@/core/pricing/plans";
 
-function planById(id: string): Plan {
-  const plan = PLANS.find((candidate) => candidate.id === id);
-  if (!plan) {
-    throw new Error(`Unknown plan: ${id}`);
-  }
-  return plan;
-}
-
-describe("pricing plans", () => {
-  it("exposes unique plan ids", () => {
-    const ids = PLANS.map((plan) => plan.id);
-    expect(new Set(ids).size).toBe(ids.length);
+describe("plan catalogue", () => {
+  it("exposes the five tiers in display order", () => {
+    expect(TIERS.map((tier) => tier.id)).toEqual([
+      "self-hosted",
+      "free",
+      "pro",
+      "team",
+      "enterprise",
+    ]);
   });
 
-  it("highlights exactly one plan", () => {
-    expect(PLANS.filter((plan) => plan.highlighted)).toHaveLength(1);
+  it("features exactly one tier", () => {
+    expect(TIERS.filter((tier) => tier.featured)).toHaveLength(1);
   });
 
-  it("gives every plan a call to action and features", () => {
-    for (const plan of PLANS) {
-      expect(plan.cta.href).not.toBe("");
-      expect(plan.cta.label).not.toBe("");
-      expect(plan.features.length).toBeGreaterThan(0);
+  it("routes only Pro and Team through checkout", () => {
+    const checkoutTiers = TIERS.filter(
+      (tier) => tier.action.kind === "checkout",
+    ).map((tier) => tier.id);
+    expect(checkoutTiers).toEqual(["pro", "team"]);
+  });
+
+  it("prices annual at twelve times the advertised monthly rate", () => {
+    for (const plan of Object.values(PAID_PLANS)) {
+      expect(plan.annual.billed).toBe(plan.annual.amount * 12);
+      expect(plan.annual.amount).toBeLessThan(plan.monthly.amount);
     }
   });
 
-  it("prices yearly billing at or below the monthly run rate", () => {
-    for (const plan of PLANS) {
-      if (plan.price.kind !== "paid") continue;
-      expect(plan.price.yearly).toBeLessThanOrEqual(plan.price.monthly * 12);
+  it("gives every comparison row a cell per column", () => {
+    for (const row of COMPARISON_ROWS) {
+      expect(row.values).toHaveLength(COMPARISON_COLUMNS.length);
     }
   });
 });
 
-describe("getPlanAmount", () => {
-  it("returns the monthly price as-is", () => {
-    expect(getPlanAmount(planById("pro"), "monthly")).toBe(20);
+describe("money", () => {
+  it("drops a trailing .00", () => {
+    expect(money(24)).toBe("$24");
+    expect(money(228)).toBe("$228");
   });
 
-  it("amortises the yearly price over twelve months", () => {
-    expect(getPlanAmount(planById("pro"), "yearly")).toBe(16);
-  });
-
-  it("returns null for free and custom tiers", () => {
-    expect(getPlanAmount(planById("community"), "monthly")).toBeNull();
-    expect(getPlanAmount(planById("enterprise"), "yearly")).toBeNull();
+  it("keeps cents when they matter", () => {
+    expect(money(182.4)).toBe("$182.40");
+    expect(money(18.25)).toBe("$18.25");
   });
 });
 
-describe("getYearlyDiscountPercent", () => {
-  it("computes the whole-percent saving for paid tiers", () => {
-    // 20/mo -> 240/yr at list, sold at 192/yr = 20% off.
-    expect(getYearlyDiscountPercent(planById("pro"))).toBe(20);
+describe("computeTotals", () => {
+  it("charges the monthly rate on a monthly cycle", () => {
+    const totals = computeTotals({ plan: "pro", cycle: "monthly", seats: 1 });
+    expect(totals.base).toBe(24);
+    expect(totals.total).toBe(24);
   });
 
-  it("is zero for tiers without a numeric price", () => {
-    expect(getYearlyDiscountPercent(planById("community"))).toBe(0);
-    expect(getYearlyDiscountPercent(planById("enterprise"))).toBe(0);
+  it("charges the full year up front on an annual cycle", () => {
+    const totals = computeTotals({ plan: "pro", cycle: "annual", seats: 1 });
+    expect(totals.base).toBe(228);
   });
 
-  it("is zero when the yearly price saves nothing", () => {
-    const plan: Plan = {
-      ...planById("pro"),
-      price: { kind: "paid", monthly: 10, yearly: 120 },
-    };
-    expect(getYearlyDiscountPercent(plan)).toBe(0);
+  it("ignores seats for a flat plan", () => {
+    const totals = computeTotals({ plan: "pro", cycle: "monthly", seats: 9 });
+    expect(totals.seats).toBe(1);
+    expect(totals.base).toBe(24);
+  });
+
+  it("multiplies by seats for a per-seat plan", () => {
+    expect(
+      computeTotals({ plan: "team", cycle: "monthly", seats: 3 }).base,
+    ).toBe(177);
+    expect(
+      computeTotals({ plan: "team", cycle: "annual", seats: 3 }).base,
+    ).toBe(1764);
+  });
+
+  it("applies a known promo to the base amount", () => {
+    const totals = computeTotals({
+      plan: "pro",
+      cycle: "annual",
+      seats: 1,
+      promo: "LAUNCH20",
+    });
+    expect(totals.discount).toBeCloseTo(45.6);
+    expect(totals.total).toBeCloseTo(182.4);
+  });
+
+  it("ignores an unknown promo", () => {
+    const totals = computeTotals({
+      plan: "pro",
+      cycle: "annual",
+      seats: 1,
+      promo: "NOPE",
+    });
+    expect(totals.discount).toBe(0);
+    expect(totals.total).toBe(228);
   });
 });
 
-describe("getMaxYearlyDiscountPercent", () => {
-  it("reports the largest saving across the tiers", () => {
-    expect(getMaxYearlyDiscountPercent()).toBe(20);
+describe("describeLineItem", () => {
+  it("names the cycle for a flat plan", () => {
+    expect(describeLineItem({ plan: "pro", cycle: "annual", seats: 4 })).toBe(
+      "Pro · annual",
+    );
   });
 
-  it("is zero when no plan offers a yearly saving", () => {
-    expect(getMaxYearlyDiscountPercent([planById("community")])).toBe(0);
+  it("includes the seat count for a per-seat plan", () => {
+    expect(describeLineItem({ plan: "team", cycle: "monthly", seats: 4 })).toBe(
+      "Team · monthly × 4 seats",
+    );
+  });
+});
+
+describe("query parameter parsing", () => {
+  it("accepts only known paid plans", () => {
+    expect(isPaidPlanId("pro")).toBe(true);
+    expect(isPaidPlanId("team")).toBe(true);
+    expect(isPaidPlanId("enterprise")).toBe(false);
+    expect(isPaidPlanId(null)).toBe(false);
+  });
+
+  it("defaults the cycle to annual", () => {
+    expect(normalizeCycle("monthly")).toBe("monthly");
+    expect(normalizeCycle("annual")).toBe("annual");
+    expect(normalizeCycle("nonsense")).toBe("annual");
+    expect(normalizeCycle(null)).toBe("annual");
+  });
+
+  it("clamps seats into range", () => {
+    expect(normalizeSeats("4")).toBe(4);
+    expect(normalizeSeats(0)).toBe(1);
+    expect(normalizeSeats(999)).toBe(MAX_SEATS);
+    expect(normalizeSeats("abc")).toBe(3);
+  });
+
+  it("resolves promo codes case-insensitively", () => {
+    expect(resolvePromo(" launch20 ")).toBe("LAUNCH20");
+    expect(resolvePromo("OSS50")).toBe("OSS50");
+    expect(resolvePromo("FAKE")).toBeNull();
+    expect(resolvePromo("")).toBeNull();
+  });
+});
+
+describe("nextRenewalDate", () => {
+  it("lands a year out for annual", () => {
+    expect(nextRenewalDate("annual", new Date("2026-08-12T00:00:00Z"))).toBe(
+      "12 Aug 2027",
+    );
+  });
+
+  it("lands a month out for monthly", () => {
+    expect(nextRenewalDate("monthly", new Date("2026-08-12T00:00:00Z"))).toBe(
+      "11 Sept 2026",
+    );
   });
 });
