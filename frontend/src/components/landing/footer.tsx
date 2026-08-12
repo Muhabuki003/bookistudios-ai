@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { useMemo } from "react";
 
+import { GITHUB_REPO_URL } from "@/core/site/links";
 import { cn } from "@/lib/utils";
 
 export type FooterProps = {
@@ -21,6 +23,34 @@ export function Footer({ className }: FooterProps) {
           &quot;Originated from Open Source, give back to Open Source.&quot;
         </p>
       </div>
+      <nav className="text-muted-foreground container mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+        <Link
+          href="/pricing"
+          className="hover:text-foreground transition-colors"
+        >
+          Pricing
+        </Link>
+        <Link
+          href="/en/docs"
+          className="hover:text-foreground transition-colors"
+        >
+          Documentation
+        </Link>
+        <Link
+          href="/blog/posts"
+          className="hover:text-foreground transition-colors"
+        >
+          Blog
+        </Link>
+        <a
+          href={GITHUB_REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-foreground transition-colors"
+        >
+          GitHub
+        </a>
+      </nav>
       <div className="text-muted-foreground container mb-8 flex flex-col items-center justify-center text-xs">
         <p>Licensed under MIT License</p>
         <p>&copy; {year} bookistudios AI</p>

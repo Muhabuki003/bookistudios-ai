@@ -42,6 +42,7 @@ export interface Translations {
   };
 
   home: {
+    pricing: string;
     docs: string;
     blog: string;
   };

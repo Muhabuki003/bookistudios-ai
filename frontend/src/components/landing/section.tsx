@@ -9,7 +9,7 @@ export function Section({
   className?: string;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <section className={cn("mx-auto flex flex-col py-16", className)}>

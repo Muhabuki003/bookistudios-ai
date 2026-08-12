@@ -1,7 +1,9 @@
+import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 
 import type { Locale } from "@/core/i18n/locale";
 import { getI18n } from "@/core/i18n/server";
+import { GITHUB_REPO_URL } from "@/core/site/links";
 import { cn } from "@/lib/utils";
 
 export type HeaderProps = {
@@ -11,8 +13,7 @@ export type HeaderProps = {
 };
 
 export async function Header({ className, homeURL, locale }: HeaderProps) {
-  const { locale: resolvedLocale, t } = await getI18n(locale);
-  const lang = resolvedLocale.substring(0, 2);
+  const { t } = await getI18n(locale);
   return (
     <header
       className={cn(
@@ -27,11 +28,20 @@ export async function Header({ className, homeURL, locale }: HeaderProps) {
       </div>
       <nav className="mr-8 ml-auto flex items-center gap-8 text-sm font-medium">
         <Link
-          href={`/${lang}/docs`}
+          href="/pricing"
           className="text-secondary-foreground hover:text-foreground transition-colors"
         >
-          {t.home.docs}
+          {t.home.pricing}
         </Link>
+        <a
+          href={GITHUB_REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-secondary-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+        >
+          {t.home.docs}
+          <ArrowUpRightIcon aria-hidden className="size-3.5" />
+        </a>
         <Link
           href="/blog/posts"
           className="text-secondary-foreground hover:text-foreground transition-colors"
