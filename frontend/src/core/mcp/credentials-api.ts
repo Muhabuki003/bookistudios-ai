@@ -100,6 +100,7 @@ export async function deleteCredential(serverName: string) {
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
+  const match = new RegExp(`(^| )${name}=([^;]+)`).exec(document.cookie);
+  const value = match?.[2];
+  return value !== undefined ? decodeURIComponent(value) : null;
 }

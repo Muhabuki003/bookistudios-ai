@@ -54,6 +54,7 @@ export const zhCN: Translations = {
 
   // Home
   home: {
+    pricing: "定价",
     docs: "文档",
     blog: "博客",
   },
