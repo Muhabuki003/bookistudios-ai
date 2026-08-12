@@ -476,7 +476,7 @@ export function InputBox({
       )}
       <PromptInput
         className={cn(
-          "bg-background/85 rounded-2xl backdrop-blur-sm transition-all duration-300 ease-out *:data-[slot='input-group']:rounded-2xl",
+          "bg-card/95 border-border/70 rounded-[28px] border shadow-sm backdrop-blur-sm transition-all duration-300 ease-out *:data-[slot='input-group']:rounded-[28px]",
           className,
         )}
         disabled={disabled}
@@ -857,7 +857,7 @@ export function InputBox({
       </PromptInput>
 
       {isWelcomeMode && searchParams.get("mode") !== "skill" && (
-        <div className="flex items-center justify-center pt-2">
+        <div className="flex items-center justify-center">
           <SuggestionList />
         </div>
       )}
@@ -913,7 +913,7 @@ function SuggestionList() {
   return (
     <Suggestions className="min-h-16 w-fit items-start">
       <ConfettiButton
-        className="text-muted-foreground cursor-pointer rounded-full px-4 text-xs font-normal"
+        className="text-foreground cursor-pointer rounded-full px-4 text-xs font-normal"
         variant="outline"
         size="sm"
         onClick={() => handleSuggestionClick(t.inputBox.surpriseMePrompt)}
@@ -923,6 +923,7 @@ function SuggestionList() {
       {t.inputBox.suggestions.map((suggestion) => (
         <Suggestion
           key={suggestion.suggestion}
+          className="text-foreground"
           icon={suggestion.icon}
           suggestion={suggestion.suggestion}
           onClick={() => handleSuggestionClick(suggestion.prompt)}
@@ -930,7 +931,11 @@ function SuggestionList() {
       ))}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Suggestion icon={PlusIcon} suggestion={t.common.create} />
+          <Suggestion
+            className="text-foreground"
+            icon={PlusIcon}
+            suggestion={t.common.create}
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <DropdownMenuGroup>
