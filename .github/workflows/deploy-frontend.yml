@@ -1,0 +1,44 @@
+name: Deploy frontend to Cloudflare Workers
+
+# The frontend is a server-rendered Next app, so it cannot be hosted as static
+# assets on Cloudflare Pages. OpenNext bundles it into a Worker, which this
+# workflow builds and deploys on every push to main.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build and deploy the Worker
+        run: pnpm cf:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # The build only needs public URLs, which fall back to the nginx proxy.
+          SKIP_ENV_VALIDATION: "1"

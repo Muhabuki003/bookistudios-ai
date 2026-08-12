@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bookistudios-ai",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-11",
+  // OpenNext runs the Next server, which needs Node built-ins.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+}

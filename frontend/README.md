@@ -66,6 +66,34 @@ pnpm build
 pnpm start
 ```
 
+### Deploying to Cloudflare
+
+Every route in this app is server-rendered on demand, so it cannot be hosted on
+Cloudflare Pages, which only serves static assets. It is deployed as a
+**Cloudflare Worker** via [OpenNext](https://opennext.js.org/cloudflare).
+
+```bash
+# Build the Worker bundle into .open-next/
+pnpm cf:build
+
+# Run the Worker locally on the real workerd runtime
+pnpm cf:preview
+
+# Build and deploy (needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID)
+pnpm cf:deploy
+```
+
+Pushes to `main` that touch `frontend/` deploy automatically via
+`.github/workflows/deploy-frontend.yml`, which needs two repository secrets:
+
+| Secret                  | Where to get it                                                            |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare dashboard → My Profile → API Tokens → _Edit Cloudflare Workers_ |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → Account ID                        |
+
+Worker settings live in `wrangler.jsonc`; OpenNext settings in
+`open-next.config.ts`.
+
 ## Site Map
 
 ```
