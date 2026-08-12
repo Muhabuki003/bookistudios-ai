@@ -78,12 +78,25 @@ export function Hero({ className }: { className?: string }) {
           <br />
           different levels of tasks that could take minutes to hours.
         </p>
-        <Link href="/workspace">
-          <Button className="size-lg mt-8 scale-108" size="lg">
-            <span className="text-md">Get Started with 2.0</span>
-            <ChevronRightIcon className="size-4" />
-          </Button>
-        </Link>
+        <div className="mt-8 flex scale-108 flex-wrap items-center justify-center gap-3">
+          <Link href="/workspace">
+            <Button className="size-lg" size="lg">
+              <span className="text-md">Get Started with 2.0</span>
+              <ChevronRightIcon className="size-4" />
+            </Button>
+          </Link>
+          <Link href="/pricing">
+            <Button
+              size="lg"
+              variant="outline"
+              // The landing page is force-dark, so the outline variant's own
+              // `dark:` colours have to be overridden, not just the base ones.
+              className="size-lg border-white/40 bg-white/10 text-white hover:border-white/60 hover:bg-white/20 hover:text-white dark:border-white/40 dark:bg-white/10 dark:hover:bg-white/20"
+            >
+              <span className="text-md">See pricing</span>
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
