@@ -61,10 +61,7 @@ export const enUS: Translations = {
 
   // Welcome
   welcome: {
-    greeting: "Hello, again!",
-    description:
-      "Welcome to 🦌 bookistudios AI, an open source super agent. With built-in and custom skills, bookistudios AI helps you search on the web, analyze data, and generate artifacts like slides, web pages and do almost anything.",
-
+    greeting: "What's next?",
     createYourOwnSkill: "Create Your Own Skill",
     createYourOwnSkillDescription:
       "Create your own skill to release the power of bookistudios AI. With customized skills,\nbookistudios AI can help you search on the web, analyze data, and generate\n artifacts like slides, web pages and do almost anything.",
