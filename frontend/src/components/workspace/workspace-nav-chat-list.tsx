@@ -1,6 +1,6 @@
 "use client";
 
-import { BotIcon, MessagesSquare } from "lucide-react";
+import { BotIcon, MessagesSquare, PenToolIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -28,12 +28,17 @@ export function WorkspaceNavChatList() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            isActive={pathname.startsWith("/workspace/agents")}
+            isActive={pathname.startsWith("/design")}
             asChild
           >
-            <Link className="text-muted-foreground" href="/workspace/agents">
-              <BotIcon />
-              <span>{t.sidebar.agents}</span>
+            <Link
+              className="text-muted-foreground"
+              href="https://design.bookistudios.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <PenToolIcon />
+              <span>{t.sidebar.design}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
