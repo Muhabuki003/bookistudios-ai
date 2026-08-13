@@ -28,6 +28,12 @@ export async function Header({ className, homeURL, locale }: HeaderProps) {
       </div>
       <nav className="mr-8 ml-auto flex items-center gap-8 text-sm font-medium">
         <Link
+          href="/en/docs"
+          className="text-secondary-foreground hover:text-foreground transition-colors"
+        >
+          {t.home.docs}
+        </Link>
+        <Link
           href="/pricing"
           className="text-secondary-foreground hover:text-foreground transition-colors"
         >
@@ -39,15 +45,9 @@ export async function Header({ className, homeURL, locale }: HeaderProps) {
           rel="noopener noreferrer"
           className="text-secondary-foreground hover:text-foreground flex items-center gap-1 transition-colors"
         >
-          {t.home.docs}
+          GitHub
           <ArrowUpRightIcon aria-hidden className="size-3.5" />
         </a>
-        <Link
-          href="/blog/posts"
-          className="text-secondary-foreground hover:text-foreground transition-colors"
-        >
-          {t.home.blog}
-        </Link>
       </nav>
       <hr className="from-border/0 via-border/70 to-border/0 absolute top-16 right-0 left-0 z-10 m-0 h-px w-full border-none bg-linear-to-r" />
     </header>

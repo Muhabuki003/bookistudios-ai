@@ -36,12 +36,6 @@ export function Footer({ className }: FooterProps) {
         >
           Documentation
         </Link>
-        <Link
-          href="/blog/posts"
-          className="hover:text-foreground transition-colors"
-        >
-          Blog
-        </Link>
         <a
           href={GITHUB_REPO_URL}
           target="_blank"
