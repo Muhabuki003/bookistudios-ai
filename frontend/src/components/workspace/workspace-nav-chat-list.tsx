@@ -28,6 +28,17 @@ export function WorkspaceNavChatList() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
+            isActive={pathname.startsWith("/workspace/agents")}
+            asChild
+          >
+            <Link className="text-muted-foreground" href="/workspace/agents">
+              <BotIcon />
+              <span>{t.sidebar.agents}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton
             isActive={pathname.startsWith("/design")}
             asChild
           >
