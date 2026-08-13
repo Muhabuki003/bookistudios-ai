@@ -116,7 +116,7 @@ export interface Translations {
     newChat: string;
     chats: string;
     demoChats: string;
-    agents:
+    agents: string;
     design: string;
   };
 
