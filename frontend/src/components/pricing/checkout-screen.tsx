@@ -288,7 +288,6 @@ export function CheckoutScreen() {
         </aside>
       </div>
 
-      <IntegrationNotes />
     </main>
   );
 }
@@ -372,45 +371,6 @@ function PaymentElementPlaceholder() {
           ))}
         </div>
       </div>
-      <p className="text-muted-foreground mt-2.5 text-[11.5px]">
-        Placeholder only — no card details are collected or sent. Replace this
-        block with the mounted Stripe Payment Element; the container id is{" "}
-        <code className="font-mono">payment-element</code>.
-      </p>
     </div>
-  );
-}
-
-function IntegrationNotes() {
-  return (
-    <details className="border-border bg-secondary mt-8 rounded-xl border px-5 py-4">
-      <summary className="cursor-pointer text-[13.5px] font-semibold">
-        Backend hooks for the Stripe integration
-      </summary>
-      <div className="text-foreground/85 pt-3 font-mono text-[12.5px] leading-[1.7]">
-        <p className="mb-2">
-          PAID_PLANS lives in <code>src/core/pricing/plans.ts</code> — price
-          ids, amounts and limits in one object.
-        </p>
-        <p className="mb-2">
-          1. POST /api/billing/subscriptions → {"{ priceId, seats, promoCode }"}{" "}
-          → returns clientSecret
-        </p>
-        <p className="mb-2">
-          2. stripe.elements({"{ clientSecret }"}
-          ).create(&apos;payment&apos;).mount(&apos;#payment-element&apos;)
-        </p>
-        <p className="mb-2">
-          3. onSubmit → stripe.confirmPayment({"{ elements, confirmParams }"})
-        </p>
-        <p className="mb-2">
-          4. Webhook: invoice.paid / customer.subscription.updated → set
-          entitlements
-        </p>
-        <p>
-          5. Billing page → POST /api/billing/portal → redirect to portal URL
-        </p>
-      </div>
-    </details>
   );
 }
