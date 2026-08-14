@@ -27,14 +27,14 @@ export interface PaidPlan {
 export const PAID_PLANS: Record<PaidPlanId, PaidPlan> = {
   pro: {
     name: "Pro",
-    monthly: { amount: 24, priceId: "price_pro_monthly_REPLACE" },
-    annual: { amount: 19, billed: 228, priceId: "price_pro_annual_REPLACE" },
+    monthly: { amount: 24, priceId: "price_1U4NyUA20Y7L8XqM7wgaMsvD" },
+    annual: { amount: 19, billed: 228, priceId: "price_1U4NyVA20Y7L8XqMTYNClMLx" },
     perSeat: false,
   },
   team: {
     name: "Team",
-    monthly: { amount: 59, priceId: "price_team_monthly_REPLACE" },
-    annual: { amount: 49, billed: 588, priceId: "price_team_annual_REPLACE" },
+    monthly: { amount: 59, priceId: "price_1U4NyWA20Y7L8XqM3umGvHmH" },
+    annual: { amount: 49, billed: 588, priceId: "price_1U4NyWA20Y7L8XqMWOaDIftJ" },
     perSeat: true,
   },
 };

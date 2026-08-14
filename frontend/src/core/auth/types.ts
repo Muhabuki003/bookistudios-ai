@@ -7,6 +7,7 @@ export const userSchema = z.object({
   email: z.string().email(),
   system_role: z.enum(["admin", "user"]),
   needs_setup: z.boolean().optional().default(false),
+  verified: z.boolean().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -40,6 +41,13 @@ const AUTH_ERROR_CODES = [
   "provider_not_found",
   "not_authenticated",
   "system_already_initialized",
+  "email_not_verified",
+  "invalid_email",
+  "weak_password",
+  "email_service_error",
+  "already_verified",
+  "rate_limited",
+  "csrf_error",
 ] as const;
 
 export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number];
