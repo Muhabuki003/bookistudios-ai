@@ -27,11 +27,13 @@ export function WorkspaceNavChatList() {
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            isActive={pathname.startsWith("/workspace/agents")}
-            asChild
-          >
-            <Link className="text-muted-foreground" href="/workspace/agents">
+          <SidebarMenuButton isActive={false} asChild>
+            <Link
+              className="text-muted-foreground"
+              href="https://agents.bookistudios.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <BotIcon />
               <span>{t.sidebar.agents}</span>
             </Link>
