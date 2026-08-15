@@ -30,7 +30,7 @@ export function WorkspaceNavChatList() {
           <SidebarMenuButton isActive={false} asChild>
             <Link
               className="text-muted-foreground"
-              href="https://agents.bookistudios.com"
+              href="https://agents.bsaiagents.com"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -46,7 +46,7 @@ export function WorkspaceNavChatList() {
           >
             <Link
               className="text-muted-foreground"
-              href="https://design.bookistudios.com"
+              href="https://design.bsaiagents.com"
               target="_blank"
               rel="noopener noreferrer"
             >
