@@ -172,6 +172,7 @@ export const enUS: Translations = {
     demoChats: "Demo chats",
     agents: "Agents",
     design: "Design",
+    code: "Code",
   },
 
   // Agents
