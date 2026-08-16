@@ -389,15 +389,23 @@ async def import_repo(project_id: str, request: Request):
     )
     if proc.returncode != 0:
         raise HTTPException(400, proc.stderr.strip()[:400] or "clone failed")
+    # Replace the workspace's fresh .git with the cloned one (rm first —
+    # shutil.move onto an existing dir NESTS it: ws/.git/.git, leaving the
+    # old repo with no origin -> "No such remote 'origin'").
+    dst_git = ws / ".git"
+    if dst_git.exists():
+        shutil.rmtree(dst_git)
+    shutil.move(str(tmp / ".git"), str(dst_git))
     for child in tmp.iterdir():
-        if child.name == ".git":
-            shutil.move(str(child), str(ws / ".git"))
-            continue
         dst = ws / child.name
         if dst.exists():
             shutil.rmtree(dst) if dst.is_dir() else dst.unlink()
         shutil.move(str(child), str(dst))
     shutil.rmtree(tmp, ignore_errors=True)
+    # drop the generated placeholder README if the imported repo has none
+    readme = ws / "README.md"
+    if readme.exists() and "Your AI coding workspace." in readme.read_text(errors="ignore"):
+        readme.unlink()
     run_git(ws, ["config", "user.name", GIT_NAME])
     run_git(ws, ["config", "user.email", GIT_EMAIL])
     # scrub any embedded token out of the remote, keep it usable for pushes
