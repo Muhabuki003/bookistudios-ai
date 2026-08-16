@@ -11,6 +11,7 @@ import {
   GitBranchIcon,
   GitPullRequestIcon,
   GithubIcon,
+  Link2OffIcon,
   Loader2Icon,
   PlusIcon,
   RefreshCwIcon,
@@ -46,6 +47,17 @@ interface Project {
   name: string;
   createdAt?: number;
   status?: { value?: string };
+}
+
+interface GhRepo {
+  full_name: string;
+  name: string;
+  owner: string;
+  private: boolean;
+  default_branch: string;
+  clone_url: string;
+  description: string;
+  updated_at: string | null;
 }
 
 interface TreeEntry {
@@ -117,6 +129,7 @@ export function CodeWorkspace() {
   const [diff, setDiff] = useState<Diff | null>(null);
   const [showDiff, setShowDiff] = useState(false);
   const [ghConnected, setGhConnected] = useState<boolean | null>(null);
+  const [ghLogin, setGhLogin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [prUrl, setPrUrl] = useState<string | null>(null);
 
@@ -124,8 +137,9 @@ export function CodeWorkspace() {
   const [newName, setNewName] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [importUrl, setImportUrl] = useState("");
-  const [ghOpen, setGhOpen] = useState(false);
-  const [ghToken, setGhToken] = useState("");
+  const [ghReposOpen, setGhReposOpen] = useState(false);
+  const [ghRepos, setGhRepos] = useState<GhRepo[] | null>(null);
+  const [ghReposLoading, setGhReposLoading] = useState(false);
   const [prOpen, setPrOpen] = useState(false);
   const [prTitle, setPrTitle] = useState("");
   const [prBody, setPrBody] = useState("");
@@ -185,6 +199,7 @@ export function CodeWorkspace() {
         const list: Project[] = projs.projects ?? [];
         setProjects(list);
         setGhConnected(gh.connected ?? false);
+        setGhLogin(gh.login ?? "");
         if (list.length > 0) {
           const last = list[list.length - 1];
           if (last) await selectProject(last.id);
@@ -197,6 +212,25 @@ export function CodeWorkspace() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // handle ?gh=connected / ?gh=error from the GitHub OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("gh") === "connected") {
+      setError(null);
+      api("/api/code/github/status")
+        .then((gh) => {
+          setGhConnected(gh.connected ?? false);
+          setGhLogin(gh.login ?? "");
+        })
+        .catch(() => {});
+    } else if (params.get("gh") === "error") {
+      setError(`GitHub connect failed: ${params.get("msg") ?? "unknown error"}`);
+    }
+    if (params.has("gh")) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   // poll the run event log
@@ -344,16 +378,56 @@ export function CodeWorkspace() {
   }
 
   async function connectGithub() {
-    const token = ghToken.trim();
-    if (!token) return;
-    setGhOpen(false);
-    setGhToken("");
+    setError(null);
     try {
-      await api("/api/code/github/token", {
+      const data = await api("/api/code/github/auth-url");
+      window.location.href = data.url;
+    } catch (e) {
+      setError(String(e));
+    }
+  }
+
+  async function disconnectGithub() {
+    setError(null);
+    try {
+      await api("/api/code/github/token", { method: "DELETE" });
+      setGhConnected(false);
+      setGhLogin("");
+    } catch (e) {
+      setError(String(e));
+    }
+  }
+
+  async function openRepos() {
+    setGhReposOpen(true);
+    setGhRepos(null);
+    setGhReposLoading(true);
+    try {
+      const data = await api("/api/code/github/repos");
+      setGhRepos(data.repos ?? []);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setGhReposLoading(false);
+    }
+  }
+
+  async function importFromRepo(repo: GhRepo) {
+    setGhReposOpen(false);
+    setError(null);
+    try {
+      const created = await api("/api/code/projects", {
         method: "POST",
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ name: repo.full_name }),
       });
-      setGhConnected(true);
+      const pid = created.project?.id;
+      await api(`/api/code/projects/${pid}/import`, {
+        method: "POST",
+        body: JSON.stringify({ repo_url: repo.clone_url }),
+      });
+      const list = await api("/api/code/projects");
+      setProjects(list.projects ?? []);
+      if (pid) await selectProject(pid);
     } catch (e) {
       setError(String(e));
     }
@@ -423,8 +497,14 @@ export function CodeWorkspace() {
         </Button>
         <div className="flex-1" />
         {!ghConnected && (
-          <Button variant="outline" size="sm" onClick={() => setGhOpen(true)}>
+          <Button variant="outline" size="sm" onClick={connectGithub}>
             <GithubIcon className="size-3.5" /> Connect GitHub
+          </Button>
+        )}
+        {ghConnected && (
+          <Button variant="outline" size="sm" onClick={openRepos}>
+            <GithubIcon className="size-3.5" />
+            {ghLogin ? `My repos · ${ghLogin}` : "My repos"}
           </Button>
         )}
         {ghConnected && (
@@ -474,7 +554,7 @@ export function CodeWorkspace() {
             <Button onClick={() => setNewOpen(true)}>
               <PlusIcon className="size-4" /> Create workspace
             </Button>
-            <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Button variant="outline" onClick={() => (ghConnected ? openRepos() : setImportOpen(true))}>
               <UploadIcon className="size-4" /> Import from GitHub
             </Button>
           </div>
@@ -713,24 +793,72 @@ export function CodeWorkspace() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={ghOpen} onOpenChange={setGhOpen}>
-        <DialogContent>
+      <Dialog open={ghReposOpen} onOpenChange={setGhReposOpen}>
+        <DialogContent className="max-h-[80vh] sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Connect GitHub</DialogTitle>
+            <DialogTitle>Import from your GitHub</DialogTitle>
             <DialogDescription>
-              Paste a fine-grained personal access token with <span className="font-mono text-[12px]">Contents: read/write</span> and{" "}
-              <span className="font-mono text-[12px]">Pull requests: read/write</span> on the repos you work on.
+              {ghConnected ? (
+                "Pick a repo to clone into a workspace — private and public repos are both listed."
+              ) : (
+                "Connect GitHub first to see your repos."
+              )}
             </DialogDescription>
           </DialogHeader>
-          <Input
-            type="password"
-            placeholder="ghp_… or github_pat_…"
-            value={ghToken}
-            onChange={(e) => setGhToken(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && connectGithub()}
-          />
+          <div className="flex min-h-0 flex-col gap-1.5 overflow-y-auto">
+            {ghReposLoading && (
+              <div className="text-muted-foreground flex items-center gap-2 py-6 text-sm">
+                <Loader2Icon className="size-4 animate-spin" /> Loading your repos…
+              </div>
+            )}
+            {!ghReposLoading && (ghRepos ?? []).length === 0 && (
+              <div className="text-muted-foreground py-6 text-center text-sm">No repos found.</div>
+            )}
+            {(ghRepos ?? []).map((repo) => (
+              <div
+                key={repo.full_name}
+                className="border-border flex items-center gap-3 rounded-lg border px-3 py-2"
+              >
+                <GithubIcon className="size-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-[13px] font-medium">{repo.full_name}</span>
+                    {repo.private ? (
+                      <span className="rounded-full bg-amber-100 px-1.5 py-px text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        private
+                      </span>
+                    ) : (
+                      <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-px text-[10px] font-medium">
+                        public
+                      </span>
+                    )}
+                  </div>
+                  {repo.description && (
+                    <p className="text-muted-foreground truncate text-[12px]">{repo.description}</p>
+                  )}
+                </div>
+                <Button size="sm" variant="outline" onClick={() => importFromRepo(repo)}>
+                  Use
+                </Button>
+              </div>
+            ))}
+          </div>
           <DialogFooter>
-            <Button onClick={connectGithub}>Connect</Button>
+            <div className="flex w-full items-center justify-between">
+              {ghConnected && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={disconnectGithub}
+                >
+                  <Link2OffIcon className="size-3.5" /> Disconnect GitHub
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={() => setGhReposOpen(false)}>
+                Close
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

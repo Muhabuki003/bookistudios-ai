@@ -13,13 +13,15 @@ import base64
 import json
 import os
 import re
+import secrets
 import subprocess
 import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import RedirectResponse, StreamingResponse
 
 OFFICE_ME_URL = os.environ.get(
     "OFFICE_ME_URL", "http://172.18.0.2:8003/api/v1/auth/me"
@@ -28,6 +30,9 @@ DAEMON_URL = os.environ.get("DAEMON_URL", "http://open-design:7456")
 PROJECTS_ROOT = Path(os.environ.get("PROJECTS_ROOT", "/app/.od/projects"))
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 GH_TOKENS_FILE = DATA_DIR / "code_gh_tokens.json"
+GITHUB_OAUTH_FILE = DATA_DIR / "github_oauth.json"
+APP_BASE = os.environ.get("APP_BASE", "https://bsaiagents.com")
+GITHUB_SCOPES = "repo read:user user:email"
 GIT_NAME = "BSAI Code"
 GIT_EMAIL = "code@bsaiagents.com"
 SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$")
@@ -81,26 +86,58 @@ def safe_rel(path: str) -> str:
     return p
 
 
-def gh_token(user: dict) -> str:
+def gh_account(user: dict) -> dict | None:
+    """Return the stored GitHub account {token, login, name, connected_at} or None."""
     try:
         data = json.loads(GH_TOKENS_FILE.read_text())
     except FileNotFoundError:
-        data = {}
-    tok = data.get(user.get("email", ""))
-    if not tok:
+        return None
+    entry = data.get(user.get("email", ""))
+    if not entry:
+        return None
+    if isinstance(entry, dict):
+        return entry
+    # legacy: plain PAT string
+    return {"token": entry, "login": "", "name": ""}
+
+
+def gh_token(user: dict) -> str:
+    acct = gh_account(user)
+    if not acct:
         raise HTTPException(409, {"code": "github_not_connected"})
-    return tok
+    return acct["token"]
 
 
-def store_gh_token(user: dict, token: str) -> None:
+def store_gh_account(user: dict, token: str, login: str = "", name: str = "") -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     try:
         data = json.loads(GH_TOKENS_FILE.read_text())
     except FileNotFoundError:
         data = {}
-    data[user.get("email", "")] = token
+    data[user.get("email", "")] = {
+        "token": token,
+        "login": login,
+        "name": name,
+        "connected_at": datetime.now(timezone.utc).isoformat(),
+    }
     GH_TOKENS_FILE.write_text(json.dumps(data, indent=2))
     os.chmod(GH_TOKENS_FILE, 0o600)
+
+
+def github_oauth_config() -> dict:
+    """Client id/secret from env (container recreate) OR the bind-mounted
+    /app/data/github_oauth.json file (no recreate — the pattern that works here)."""
+    env_id = os.environ.get("GITHUB_CLIENT_ID", "")
+    env_secret = os.environ.get("GITHUB_CLIENT_SECRET", "")
+    if env_id and env_secret:
+        return {"client_id": env_id, "client_secret": env_secret}
+    try:
+        cfg = json.loads(GITHUB_OAUTH_FILE.read_text())
+        if cfg.get("client_id") and cfg.get("client_secret"):
+            return cfg
+    except FileNotFoundError:
+        pass
+    return {}
 
 
 def run_git(ws: Path, args: list[str], **kw) -> str:
@@ -320,8 +357,14 @@ async def import_repo(project_id: str, request: Request):
     tmp = Path("/tmp") / f"bsai-import-{project_id}"
     if tmp.exists():
         shutil.rmtree(tmp)
+    clone_url = url
+    try:
+        token = gh_token(user)
+        clone_url = re.sub(r"^https://", f"https://x-access-token:{token}@", url)
+    except HTTPException:
+        pass  # public repo, no token needed
     proc = subprocess.run(
-        ["git", "clone", "--depth", "1", url, str(tmp)],
+        ["git", "clone", "--depth", "1", clone_url, str(tmp)],
         capture_output=True, text=True, timeout=300,
     )
     if proc.returncode != 0:
@@ -337,6 +380,8 @@ async def import_repo(project_id: str, request: Request):
     shutil.rmtree(tmp, ignore_errors=True)
     run_git(ws, ["config", "user.name", GIT_NAME])
     run_git(ws, ["config", "user.email", GIT_EMAIL])
+    # scrub any embedded token out of the remote, keep it usable for pushes
+    run_git(ws, ["remote", "set-url", "origin", url])
     return {"ok": True, "cloned": url}
 
 
@@ -464,16 +509,182 @@ async def stream_events(project_id: str, request: Request):
     })
 
 
+@app.get("/api/code/projects/{project_id}/runs/{run_id}/events")
+async def run_events(project_id: str, run_id: str, request: Request, after: int = 0):
+    """Return events from the run's events.jsonl (polled by the UI)."""
+    await current_user(request)
+    await check_owner(request, project_id)
+    if not SAFE_ID.match(run_id or ""):
+        raise HTTPException(400, "invalid run id")
+    path = Path("/app/.od/runs") / run_id / "events.jsonl"
+    if not path.is_file():
+        return {"events": [], "total": 0, "done": False}
+    lines = path.read_text(encoding="utf-8").splitlines()
+    total = len(lines)
+    events = []
+    for line in lines[max(0, after):]:
+        line = line.strip()
+        if line:
+            try:
+                events.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    done = total > 0 and json.loads(lines[-1]).get("event") == "end"
+    return {"events": events, "total": total, "done": done}
+
+
+@app.get("/api/code/projects/{project_id}/runs/{run_id}")
+async def run_status(project_id: str, run_id: str, request: Request):
+    await current_user(request)
+    await check_owner(request, project_id)
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(
+            f"{DAEMON_URL}/api/runs/{urllib.parse.quote(run_id)}",
+            cookies=request.cookies,
+        )
+    if resp.status_code != 200:
+        raise HTTPException(resp.status_code, resp.text[:300])
+    return resp.json()
+
+
 # ---------- GitHub account ----------
 
 @app.get("/api/code/github/status")
 async def github_status(request: Request):
     user = await current_user(request)
-    try:
-        tok = gh_token(user)
-        return {"connected": True, "scopes_hint": "repo"}
-    except HTTPException:
+    acct = gh_account(user)
+    if not acct:
         return {"connected": False}
+    return {
+        "connected": True,
+        "login": acct.get("login") or "",
+        "name": acct.get("name") or "",
+        "scopes_hint": "repo",
+    }
+
+
+@app.get("/api/code/github/auth-url")
+async def github_auth_url(request: Request, response: Response):
+    """Return the GitHub OAuth authorize URL (frontend redirects the browser)."""
+    user = await current_user(request)
+    cfg = github_oauth_config()
+    if not cfg.get("client_id"):
+        raise HTTPException(503, {"code": "github_oauth_not_configured"})
+    state = secrets.token_urlsafe(24)
+    redirect_uri = f"{APP_BASE}/api/code/github/callback"
+    params = {
+        "client_id": cfg["client_id"],
+        "redirect_uri": redirect_uri,
+        "scope": GITHUB_SCOPES,
+        "state": state,
+        "allow_signup": "false",
+    }
+    url = "https://github.com/login/oauth/authorize?" + urllib.parse.urlencode(params)
+    response.set_cookie(
+        "gh_oauth_state", state, httponly=True, samesite="lax",
+        max_age=600, path="/",
+    )
+    return {"url": url}
+
+
+@app.get("/api/code/github/callback")
+async def github_callback(request: Request):
+    """GitHub redirects here after the user authorizes. Exchange code -> token,
+    store per-user, bounce back to the app."""
+    q = request.query_params
+    err = q.get("error")
+    code = q.get("code")
+    state = q.get("state") or ""
+    if err:
+        return RedirectResponse(f"{APP_BASE}/workspace/code?gh=error&msg={urllib.parse.quote(err)}")
+    expected = request.cookies.get("gh_oauth_state", "")
+    if not expected or not secrets.compare_digest(expected, state):
+        return RedirectResponse(f"{APP_BASE}/workspace/code?gh=error&msg=invalid_state")
+    cfg = github_oauth_config()
+    if not cfg.get("client_id") or not cfg.get("client_secret") or not code:
+        return RedirectResponse(f"{APP_BASE}/workspace/code?gh=error&msg=not_configured")
+    redirect_uri = f"{APP_BASE}/api/code/github/callback"
+    async with httpx.AsyncClient(timeout=20) as client:
+        resp = await client.post(
+            "https://github.com/login/oauth/access_token",
+            data={
+                "client_id": cfg["client_id"],
+                "client_secret": cfg["client_secret"],
+                "code": code,
+                "redirect_uri": redirect_uri,
+            },
+            headers={"Accept": "application/json"},
+        )
+    if resp.status_code != 200:
+        return RedirectResponse(f"{APP_BASE}/workspace/code?gh=error&msg=exchange_failed")
+    tok = resp.json().get("access_token")
+    if not tok:
+        return RedirectResponse(f"{APP_BASE}/workspace/code?gh=error&msg=no_token")
+    # the BSAI session must still be valid (top-level nav carries cookies)
+    try:
+        user = await current_user(request)
+    except HTTPException:
+        return RedirectResponse(f"{APP_BASE}/login?next=/workspace/code")
+    # fetch the GitHub identity for display
+    login, name = "", ""
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            uresp = await client.get(
+                "https://api.github.com/user",
+                headers={"Authorization": f"Bearer {tok}", "Accept": "application/vnd.github+json"},
+            )
+        if uresp.status_code == 200:
+            login = uresp.json().get("login", "") or ""
+            name = uresp.json().get("name") or ""
+    except Exception:  # noqa: BLE001
+        pass
+    store_gh_account(user, tok, login=login, name=name)
+    out = RedirectResponse(f"{APP_BASE}/workspace/code?gh=connected")
+    out.delete_cookie("gh_oauth_state", path="/")
+    return out
+
+
+@app.get("/api/code/github/repos")
+async def github_repos(request: Request, per_page: int = 100):
+    """List EVERY repo the connected GitHub account can see (owner, collaborator, org)."""
+    user = await current_user(request)
+    tok = gh_token(user)
+    headers = {"Authorization": f"Bearer {tok}", "Accept": "application/vnd.github+json"}
+    repos = []
+    async with httpx.AsyncClient(timeout=30) as client:
+        for page in range(1, 5):  # up to 400 repos
+            resp = await client.get(
+                "https://api.github.com/user/repos",
+                params={
+                    "per_page": per_page,
+                    "page": page,
+                    "sort": "updated",
+                    "affiliation": "owner,collaborator,organization_member",
+                },
+                headers=headers,
+            )
+            if resp.status_code != 200:
+                raise HTTPException(502, f"GitHub API error {resp.status_code}")
+            batch = resp.json()
+            repos.extend(batch)
+            if len(batch) < per_page:
+                break
+    return {
+        "count": len(repos),
+        "repos": [
+            {
+                "full_name": r.get("full_name"),
+                "name": r.get("name"),
+                "owner": (r.get("owner") or {}).get("login"),
+                "private": r.get("private"),
+                "default_branch": r.get("default_branch"),
+                "clone_url": r.get("clone_url"),
+                "description": r.get("description") or "",
+                "updated_at": r.get("updated_at"),
+            }
+            for r in repos
+        ],
+    }
 
 
 @app.post("/api/code/github/token")

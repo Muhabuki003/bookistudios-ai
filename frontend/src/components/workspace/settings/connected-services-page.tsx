@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ExternalLinkIcon,
+  GithubIcon,
   KeyIcon,
   Link2Icon,
   Link2OffIcon,
@@ -11,7 +12,7 @@ import {
   CheckCircle2Icon,
   XCircleIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,123 @@ import {
 import { cn } from "@/lib/utils";
 
 import { SettingsSection } from "./settings-section";
+
+async function ghApi(path: string, init?: RequestInit) {
+  const resp = await fetch(path, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    ...init,
+  });
+  if (!resp.ok) {
+    let detail = resp.statusText;
+    try {
+      const body = await resp.json();
+      detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail ?? body);
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
+  return resp.json();
+}
+
+/** Real GitHub connection (OAuth redirect), shown above the MCP services list. */
+function GitHubServiceCard() {
+  const [status, setStatus] = useState<{ connected: boolean; login: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    ghApi("/api/code/github/status")
+      .then((s) => {
+        if (!cancelled) setStatus(s);
+      })
+      .catch(() => {
+        if (!cancelled) setStatus({ connected: false, login: "" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function connect() {
+    setBusy(true);
+    setError(null);
+    try {
+      const data = await ghApi("/api/code/github/auth-url");
+      window.location.href = data.url;
+    } catch (e) {
+      setError(String(e));
+      setBusy(false);
+    }
+  }
+
+  async function disconnect() {
+    setBusy(true);
+    setError(null);
+    try {
+      await ghApi("/api/code/github/token", { method: "DELETE" });
+      setStatus({ connected: false, login: "" });
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const isConnected = status?.connected ?? false;
+
+  return (
+    <Item className="w-full" variant="outline">
+      <ItemContent>
+        <ItemTitle>
+          <div className="flex items-center gap-2">
+            <GithubIcon className="size-4" />
+            <span>GitHub</span>
+            {isConnected ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <CheckCircle2Icon className="size-3" />
+                {status?.login ? `Connected as ${status.login}` : "Connected"}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                <XCircleIcon className="size-3" />
+                Disconnected
+              </span>
+            )}
+          </div>
+        </ItemTitle>
+        <ItemDescription className="line-clamp-2">
+          Authorize BSAI to access your GitHub account — all your public and private repos become
+          available in the Code tab for import, push and pull requests.
+        </ItemDescription>
+        {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+      </ItemContent>
+      <ItemActions>
+        <div className="flex flex-col items-end gap-2">
+          {isConnected ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive gap-1.5"
+              onClick={disconnect}
+              disabled={busy}
+            >
+              {busy ? <Loader2Icon className="size-3.5 animate-spin" /> : <Link2OffIcon className="size-3.5" />}
+              Disconnect
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={connect} disabled={busy}>
+              {busy ? <Loader2Icon className="size-3.5 animate-spin" /> : <GithubIcon className="size-3.5" />}
+              Connect
+            </Button>
+          )}
+        </div>
+      </ItemActions>
+    </Item>
+  );
+}
 
 export function ConnectedServicesPage() {
   const { t } = useI18n();
@@ -55,7 +173,7 @@ export function ConnectedServicesPage() {
   return (
     <SettingsSection
       title="Connected Services"
-      description="Connect your personal accounts to give your agent access to Notion, Google Workspace, Figma, and more."
+      description="Connect your personal accounts to give your agent access to GitHub, Notion, Google Workspace, Figma, and more."
     >
       {isLoading ? (
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -66,6 +184,7 @@ export function ConnectedServicesPage() {
         <div className="text-destructive text-sm">Error: {error.message}</div>
       ) : (
         <div className="flex w-full flex-col gap-4">
+          <GitHubServiceCard />
           {serversData?.servers &&
             Object.entries(serversData.servers).map(([serverName, meta]) => (
               <ConnectedServiceCard
