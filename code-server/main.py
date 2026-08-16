@@ -76,7 +76,7 @@ def workspace(project_id: str) -> Path:
 
 def safe_rel(path: str) -> str:
     p = urllib.parse.unquote(path or "")
-    if not p or p.startswith("/") or ".." in Path(p).parts:
+    if p.startswith("/") or ".." in Path(p).parts:
         raise HTTPException(400, "invalid path")
     return p
 
@@ -184,7 +184,7 @@ async def file_tree(project_id: str, request: Request, path: str = ""):
         entries.append({
             "name": child.name,
             "type": "dir" if child.is_dir() else "file",
-            "path": str((Path(rel) / child.name).resolve().relative_to(ws)),
+            "path": str((Path(rel) / child.name)),
         })
     return {"path": rel, "entries": entries}
 
@@ -242,6 +242,11 @@ async def git_diff(project_id: str, request: Request):
     ws = workspace(project_id)
     if not (ws / ".git").exists():
         return {"diff": ""}
+    # intent-to-add so untracked files appear in the diff
+    subprocess.run(
+        ["git", "-C", str(ws), "add", "-N", "."],
+        capture_output=True, text=True, timeout=60,
+    )
     diff = run_git(ws, ["diff", "HEAD", "--stat", "--"])
     full = run_git(ws, ["diff", "HEAD", "--"])
     return {"stat": diff, "diff": full}
