@@ -5,6 +5,7 @@ import { AuthProvider } from "@/core/auth/AuthProvider";
 import { getServerSideUser } from "@/core/auth/server";
 import { assertNever } from "@/core/auth/types";
 
+import { BsaiUserCookie } from "@/components/workspace/bsai-user-cookie";
 import { WorkspaceContent } from "./workspace-content";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export default async function WorkspaceLayout({
     case "authenticated":
       return (
         <AuthProvider initialUser={result.user}>
+          <BsaiUserCookie />
           <WorkspaceContent>{children}</WorkspaceContent>
         </AuthProvider>
       );

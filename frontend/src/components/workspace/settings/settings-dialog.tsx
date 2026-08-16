@@ -9,6 +9,7 @@ import {
   UserIcon,
   WrenchIcon,
   PlugIcon,
+  CreditCardIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -22,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AboutSettingsPage } from "@/components/workspace/settings/about-settings-page";
 import { AccountSettingsPage } from "@/components/workspace/settings/account-settings-page";
 import { AppearanceSettingsPage } from "@/components/workspace/settings/appearance-settings-page";
+import { BillingSettingsPage } from "@/components/workspace/settings/billing-settings-page";
 import { ConnectedServicesPage } from "@/components/workspace/settings/connected-services-page";
 import { MemorySettingsPage } from "@/components/workspace/settings/memory-settings-page";
 import { NotificationSettingsPage } from "@/components/workspace/settings/notification-settings-page";
@@ -38,6 +40,7 @@ type SettingsSection =
   | "services"
   | "skills"
   | "notification"
+  | "billing"
   | "about";
 
 type SettingsDialogProps = React.ComponentProps<typeof Dialog> & {
@@ -82,6 +85,7 @@ export function SettingsDialog(props: SettingsDialogProps) {
       },
       { id: "tools", label: t.settings.sections.tools, icon: WrenchIcon },
       { id: "services", label: "Connected Services", icon: PlugIcon },
+      { id: "billing", label: "Billing", icon: CreditCardIcon },
       { id: "skills", label: t.settings.sections.skills, icon: SparklesIcon },
       { id: "about", label: t.settings.sections.about, icon: InfoIcon },
     ],
@@ -138,6 +142,7 @@ export function SettingsDialog(props: SettingsDialogProps) {
           <ScrollArea className="h-full min-h-0 rounded-lg border">
             <div className="space-y-8 p-6">
               {activeSection === "account" && <AccountSettingsPage />}
+              {activeSection === "billing" && <BillingSettingsPage />}
               {activeSection === "appearance" && <AppearanceSettingsPage />}
               {activeSection === "memory" && <MemorySettingsPage />}
               {activeSection === "tools" && <ToolSettingsPage />}

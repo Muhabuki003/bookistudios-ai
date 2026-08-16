@@ -9,6 +9,7 @@ import { EarlyAccessModal } from "@/components/early-access-modal";
 import { Button } from "@/components/ui/button";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import { Input } from "@/components/ui/input";
+import { setBsaiUserCookie } from "@/components/workspace/bsai-user-cookie";
 import { useAuth } from "@/core/auth/AuthProvider";
 import { parseAuthError } from "@/core/auth/types";
 
@@ -129,14 +130,16 @@ export default function LoginPage() {
       }
 
       if (isLogin) {
-        // Login sets a cookie — redirect to workspace
+        // Login sets a cookie — keep the shared bsai_user cookie in sync,
+        // then redirect to workspace.
+        setBsaiUserCookie(email.trim());
         router.push(redirectPath);
         return;
       }
 
-      // Register: account is created but NOT verified — show the
-      // "check your inbox" state instead of logging the user in.
-      setRegisteredEmail(email.trim());
+      // Register: account is created but NOT verified — send the user to the
+      // pricing page to pick a tier (they confirm their email from the inbox).
+      router.push("/pricing");
     } catch {
       setError("Network error. Please try again.");
     } finally {

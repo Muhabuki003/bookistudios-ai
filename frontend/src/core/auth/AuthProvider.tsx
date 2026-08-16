@@ -11,6 +11,7 @@ import React, {
 } from "react";
 
 import { type User, buildLoginUrl } from "./types";
+import { clearBsaiUserCookie } from "@/components/workspace/bsai-user-cookie";
 
 // Re-export for consumers
 export type { User };
@@ -86,6 +87,7 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   const logout = useCallback(async () => {
     // Immediately clear local state to prevent UI flicker
     setUser(null);
+    clearBsaiUserCookie();
 
     try {
       await fetch("/api/v1/auth/logout", {
