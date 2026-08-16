@@ -176,17 +176,37 @@ async def list_projects(request: Request):
 async def create_project(request: Request):
     user = await current_user(request)
     body = await request.json()
-    payload = {"id": body.get("id") or None, "name": body.get("name") or "Code workspace"}
+    name = (body.get("name") or "Code workspace").strip()[:120]
+    # The daemon REQUIRES a client-supplied id matching [A-Za-z0-9][A-Za-z0-9._-]
+    # ("invalid project id" otherwise) — derive a safe, unique slug from the name.
+    pid = (body.get("id") or "").strip()
+    if not SAFE_ID.match(pid or ""):
+        pid = re.sub(r"[^A-Za-z0-9._-]", "-", name.lower()).strip("-")[:100] or "code-workspace"
+        if not re.match(r"^[A-Za-z0-9]", pid):
+            pid = "w-" + pid
+        # make it unique against existing projects
+        existing = set()
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.get(f"{DAEMON_URL}/api/projects", cookies=request.cookies)
+            if resp.status_code == 200:
+                existing = {p.get("id") for p in resp.json().get("projects", []) if isinstance(p, dict)}
+        except Exception:  # noqa: BLE001
+            pass
+        base, n = pid, 1
+        while pid in existing:
+            n += 1
+            pid = f"{base}-{n}"[:100]
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.post(
             f"{DAEMON_URL}/api/projects",
-            json={k: v for k, v in payload.items() if v is not None},
+            json={"id": pid, "name": name},
             cookies=request.cookies,
         )
     if resp.status_code >= 400:
         raise HTTPException(resp.status_code, resp.text[:300])
     project = resp.json().get("project", {})
-    pid = project.get("id")
+    pid = project.get("id") or pid
     ws = workspace(pid)
     ws.mkdir(parents=True, exist_ok=True)
     if not (ws / ".git").exists():
@@ -194,7 +214,7 @@ async def create_project(request: Request):
         run_git(ws, ["config", "user.name", GIT_NAME])
         run_git(ws, ["config", "user.email", GIT_EMAIL])
         (ws / "README.md").write_text(
-            f"# {project.get('name') or 'BSAI Code workspace'}\n\nYour AI coding workspace.\n"
+            f"# {project.get('name') or name}\n\nYour AI coding workspace.\n"
         )
         run_git(ws, ["add", "-A"])
         run_git(ws, ["commit", "-m", "Initial commit"])

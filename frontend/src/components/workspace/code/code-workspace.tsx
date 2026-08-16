@@ -15,6 +15,7 @@ import {
   Loader2Icon,
   PlusIcon,
   RefreshCwIcon,
+  SearchIcon,
   TerminalIcon,
   UploadIcon,
   XIcon,
@@ -140,6 +141,7 @@ export function CodeWorkspace() {
   const [ghReposOpen, setGhReposOpen] = useState(false);
   const [ghRepos, setGhRepos] = useState<GhRepo[] | null>(null);
   const [ghReposLoading, setGhReposLoading] = useState(false);
+  const [ghReposSearch, setGhReposSearch] = useState("");
   const [prOpen, setPrOpen] = useState(false);
   const [prTitle, setPrTitle] = useState("");
   const [prBody, setPrBody] = useState("");
@@ -418,7 +420,7 @@ export function CodeWorkspace() {
     try {
       const created = await api("/api/code/projects", {
         method: "POST",
-        body: JSON.stringify({ name: repo.full_name }),
+        body: JSON.stringify({ name: repo.name }),
       });
       const pid = created.project?.id;
       await api(`/api/code/projects/${pid}/import`, {
@@ -794,7 +796,7 @@ export function CodeWorkspace() {
       </Dialog>
 
       <Dialog open={ghReposOpen} onOpenChange={setGhReposOpen}>
-        <DialogContent className="max-h-[80vh] sm:max-w-lg">
+        <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Import from your GitHub</DialogTitle>
             <DialogDescription>
@@ -805,7 +807,18 @@ export function CodeWorkspace() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex min-h-0 flex-col gap-1.5 overflow-y-auto">
+          {ghConnected && !ghReposLoading && (ghRepos ?? []).length > 0 && (
+            <div className="relative">
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+              <Input
+                placeholder="Search your repos…"
+                value={ghReposSearch}
+                onChange={(e) => setGhReposSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          )}
+          <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto">
             {ghReposLoading && (
               <div className="text-muted-foreground flex items-center gap-2 py-6 text-sm">
                 <Loader2Icon className="size-4 animate-spin" /> Loading your repos…
@@ -814,34 +827,60 @@ export function CodeWorkspace() {
             {!ghReposLoading && (ghRepos ?? []).length === 0 && (
               <div className="text-muted-foreground py-6 text-center text-sm">No repos found.</div>
             )}
-            {(ghRepos ?? []).map((repo) => (
-              <div
-                key={repo.full_name}
-                className="border-border flex items-center gap-3 rounded-lg border px-3 py-2"
-              >
-                <GithubIcon className="size-4 shrink-0 text-muted-foreground" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-[13px] font-medium">{repo.full_name}</span>
-                    {repo.private ? (
-                      <span className="rounded-full bg-amber-100 px-1.5 py-px text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        private
-                      </span>
-                    ) : (
-                      <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-px text-[10px] font-medium">
-                        public
-                      </span>
-                    )}
+            {!ghReposLoading &&
+              (ghRepos ?? [])
+                .filter((repo) => {
+                  const q = ghReposSearch.trim().toLowerCase();
+                  if (!q) return true;
+                  return (
+                    repo.name.toLowerCase().includes(q) ||
+                    repo.full_name.toLowerCase().includes(q) ||
+                    repo.description.toLowerCase().includes(q)
+                  );
+                })
+                .map((repo) => (
+                  <div
+                    key={repo.full_name}
+                    className="border-border flex items-center gap-3 rounded-lg border px-3 py-2"
+                  >
+                    <GithubIcon className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-[13px] font-medium">{repo.name}</span>
+                        {repo.private ? (
+                          <span className="rounded-full bg-amber-100 px-1.5 py-px text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            private
+                          </span>
+                        ) : (
+                          <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-px text-[10px] font-medium">
+                            public
+                          </span>
+                        )}
+                      </div>
+                      {repo.description && (
+                        <p className="text-muted-foreground truncate text-[12px]">{repo.description}</p>
+                      )}
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => importFromRepo(repo)}>
+                      Use
+                    </Button>
                   </div>
-                  {repo.description && (
-                    <p className="text-muted-foreground truncate text-[12px]">{repo.description}</p>
-                  )}
+                ))}
+            {!ghReposLoading &&
+              (ghRepos ?? []).length > 0 &&
+              (ghRepos ?? []).filter((repo) => {
+                const q = ghReposSearch.trim().toLowerCase();
+                if (!q) return true;
+                return (
+                  repo.name.toLowerCase().includes(q) ||
+                  repo.full_name.toLowerCase().includes(q) ||
+                  repo.description.toLowerCase().includes(q)
+                );
+              }).length === 0 && (
+                <div className="text-muted-foreground py-6 text-center text-sm">
+                  No repos match "{ghReposSearch}".
                 </div>
-                <Button size="sm" variant="outline" onClick={() => importFromRepo(repo)}>
-                  Use
-                </Button>
-              </div>
-            ))}
+              )}
           </div>
           <DialogFooter>
             <div className="flex w-full items-center justify-between">
