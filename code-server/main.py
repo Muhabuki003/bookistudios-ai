@@ -21,7 +21,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 
 OFFICE_ME_URL = os.environ.get(
     "OFFICE_ME_URL", "http://172.18.0.2:8003/api/v1/auth/me"
@@ -108,20 +108,88 @@ def gh_token(user: dict) -> str:
     return acct["token"]
 
 
-def store_gh_account(user: dict, token: str, login: str = "", name: str = "") -> None:
+def store_gh_account(
+    user: dict, token: str, login: str = "", name: str = "",
+    refresh_token: str = "", expires_in: int = 0,
+) -> None:
+    """Persist the GitHub OAuth token. When the OAuth app has user-to-server
+    token expiration enabled, GitHub issues short-lived access tokens (~8h)
+    plus a refresh_token — store both so we can auto-refresh instead of
+    forcing the user to reconnect every few hours."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     try:
         data = json.loads(GH_TOKENS_FILE.read_text())
     except FileNotFoundError:
         data = {}
-    data[user.get("email", "")] = {
+    entry = {
         "token": token,
         "login": login,
         "name": name,
         "connected_at": datetime.now(timezone.utc).isoformat(),
     }
+    if refresh_token:
+        entry["refresh_token"] = refresh_token
+        try:
+            entry["expires_at"] = (
+                datetime.now(timezone.utc).timestamp() + int(expires_in) - 60
+            )
+        except (TypeError, ValueError):
+            pass
+    data[user.get("email", "")] = entry
     GH_TOKENS_FILE.write_text(json.dumps(data, indent=2))
     os.chmod(GH_TOKENS_FILE, 0o600)
+
+
+async def refresh_gh_token(user: dict) -> str | None:
+    """Exchange the stored refresh_token for a fresh access token.
+    Returns the new token (already persisted) or None if not possible."""
+    acct = gh_account(user)
+    if not acct or not acct.get("refresh_token"):
+        return None
+    cfg = github_oauth_config()
+    if not cfg.get("client_id") or not cfg.get("client_secret"):
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            resp = await client.post(
+                "https://github.com/login/oauth/access_token",
+                data={
+                    "client_id": cfg["client_id"],
+                    "client_secret": cfg["client_secret"],
+                    "grant_type": "refresh_token",
+                    "refresh_token": acct["refresh_token"],
+                },
+                headers={"Accept": "application/json"},
+            )
+        if resp.status_code != 200:
+            return None
+        body = resp.json()
+        new_tok = body.get("access_token")
+        if not new_tok:
+            return None
+        store_gh_account(
+            user, new_tok,
+            login=acct.get("login", ""), name=acct.get("name", ""),
+            refresh_token=body.get("refresh_token") or acct["refresh_token"],
+            expires_in=int(body.get("expires_in") or 0),
+        )
+        return new_tok
+    except Exception:  # noqa: BLE001
+        return None
+
+
+async def gh_token_fresh(user: dict) -> str:
+    """Return a (possibly auto-refreshed) GitHub token for the user."""
+    acct = gh_account(user)
+    if not acct:
+        raise HTTPException(409, {"code": "github_not_connected"})
+    tok = acct["token"]
+    expires_at = acct.get("expires_at") or 0
+    if expires_at and expires_at <= datetime.now(timezone.utc).timestamp():
+        new_tok = await refresh_gh_token(user)
+        if new_tok:
+            return new_tok
+    return tok
 
 
 def github_oauth_config() -> dict:
@@ -277,6 +345,20 @@ async def write_file(project_id: str, request: Request):
     return {"ok": True}
 
 
+@app.get("/api/code/projects/{project_id}/preview")
+async def project_preview(project_id: str, request: Request, path: str = "index.html"):
+    """Serve a built artifact (default index.html) from the project workspace —
+    powers the Code tab's auto-show preview iframe (same-origin via /api/code/)."""
+    await current_user(request)
+    await check_owner(request, project_id)
+    ws = workspace(project_id)
+    rel = safe_rel(path)
+    target = (ws / rel).resolve()
+    if not str(target).startswith(str(ws.resolve())) or not target.is_file():
+        raise HTTPException(404, "artifact not found")
+    return FileResponse(target)
+
+
 # ---------- git ----------
 
 @app.get("/api/code/projects/{project_id}/git/status")
@@ -423,14 +505,18 @@ async def create_pr(project_id: str, request: Request):
     body = await request.json()
     title = (body.get("title") or "Update from BSAI Code").strip()[:200]
     pr_body = (body.get("body") or "").strip()[:4000]
-    base = (body.get("base") or "main").strip()[:60]
+    requested_base = (body.get("base") or "").strip()[:60]
+    # default base must match the repo's actual default branch (auto-created
+    # repos may default to "master") or GitHub rejects the PR with 422 base:invalid
+    base = requested_base or "main"
 
     run_git(ws, ["config", "user.name", GIT_NAME])
     run_git(ws, ["config", "user.email", GIT_EMAIL])
 
     # ensure a remote
     remotes = run_git(ws, ["remote"]).splitlines() if (ws / ".git").exists() else []
-    if "origin" not in remotes:
+    fresh_repo = "origin" not in remotes
+    if fresh_repo:
         slug = re.sub(r"[^A-Za-z0-9_-]", "-", project_id)[:80] or "bsai-code-workspace"
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
         async with httpx.AsyncClient(timeout=20) as client:
@@ -441,11 +527,28 @@ async def create_pr(project_id: str, request: Request):
             )
         if resp.status_code not in (200, 201):
             raise HTTPException(400, resp.text[:300])
-        full_name = resp.json().get("full_name", f"{user.get('email','').split('@')[0]}/{slug}")
+        repo_json = resp.json()
+        full_name = repo_json.get("full_name", f"{user.get('email','').split('@')[0]}/{slug}")
         owner, repo = full_name.split("/")
+        if not requested_base:
+            base = repo_json.get("default_branch") or base
         run_git(ws, ["remote", "add", "origin", f"https://github.com/{owner}/{repo}.git"])
     else:
         owner, repo = repo_ident(ws)
+        if not requested_base:
+            # resolve the remote repo's default branch so PRs don't 422
+            headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+            try:
+                async with httpx.AsyncClient(timeout=20) as client:
+                    rinfo = await client.get(
+                        f"https://api.github.com/repos/{owner}/{repo}", headers=headers
+                    )
+                if rinfo.status_code == 200:
+                    db = (rinfo.json() or {}).get("default_branch")
+                    if db:
+                        base = db
+            except Exception:  # noqa: BLE001
+                pass
 
     # branch
     cur = run_git(ws, ["rev-parse", "--abbrev-ref", "HEAD"])
@@ -461,7 +564,13 @@ async def create_pr(project_id: str, request: Request):
     if run_git(ws, ["status", "--porcelain"]):
         run_git(ws, ["commit", "-m", title])
 
-    # push
+    # push: for a freshly auto-created repo the remote starts EMPTY (no
+    # branches), so push the base branch first — otherwise the PR base
+    # doesn't exist and GitHub rejects with 422 base:invalid.
+    if fresh_repo and cur != base:
+        run_git(ws, ["branch", "-f", base, cur])
+    if fresh_repo:
+        run_git(ws, ["-c", _push_header(token), "push", "-u", "origin", base])
     run_git(ws, ["-c", _push_header(token), "push", "-u", "origin", head])
 
     # open PR
