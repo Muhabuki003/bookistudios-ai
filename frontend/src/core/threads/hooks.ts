@@ -75,11 +75,27 @@ function mergeMessages(
     }
   }
 
-  return [
+  // Dedupe by message identity across all sources (history < thread < optimistic),
+  // keeping the first occurrence. This prevents the same message from rendering
+  // twice when the stream events, the history endpoint, and the optimistic state
+  // all carry it (e.g. the user's own human message after a reload or reconnect).
+  const seen = new Set<string>();
+  const merged: Message[] = [];
+  for (const message of [
     ...historyMessages.slice(0, cutoff),
     ...threadMessages,
     ...optimisticMessages,
-  ];
+  ]) {
+    const identity = messageIdentity(message);
+    if (identity) {
+      if (seen.has(identity)) {
+        continue;
+      }
+      seen.add(identity);
+    }
+    merged.push(message);
+  }
+  return merged;
 }
 
 function messageIdentity(message: Message): string | undefined {
@@ -87,6 +103,31 @@ function messageIdentity(message: Message): string | undefined {
     return message.tool_call_id;
   }
   return message.id;
+}
+
+function getMessageText(message: Message): string | null {
+  const content = message.content;
+  if (typeof content === "string") {
+    return content.trim() ? content : null;
+  }
+  if (Array.isArray(content)) {
+    let text = "";
+    for (const part of content) {
+      if (
+        typeof part === "object" &&
+        part !== null &&
+        "type" in part &&
+        (part as { type?: unknown }).type === "text"
+      ) {
+        const partText = (part as { text?: unknown }).text;
+        if (typeof partText === "string") {
+          text += partText;
+        }
+      }
+    }
+    return text.trim() ? text : null;
+  }
+  return null;
 }
 
 function getMessagesAfterBaseline(
@@ -330,6 +371,10 @@ export function useThreadStream({
   // from "messages-tuple" events arrive before the input human message from
   // "values" events).
   const prevHumanMsgCountRef = useRef(humanMessageCount);
+  // Snapshot of server-side human message texts at send time; used to detect the
+  // server's copy of the just-sent message by content (a plain index-based guard
+  // is unreliable because human messages are interleaved with AI/tool messages).
+  const prevHumanTextsRef = useRef<Set<string>>(new Set());
 
   latestMessageCountsRef.current = { humanMessageCount };
   summarizedRef.current ??= new Set<string>();
@@ -342,6 +387,12 @@ export function useThreadStream({
     pendingUsageBaselineMessageIdsRef.current = new Set();
     prevHumanMsgCountRef.current =
       latestMessageCountsRef.current.humanMessageCount;
+    prevHumanTextsRef.current = new Set(
+      thread.messages
+        .filter((m) => m.type === "human")
+        .map((m) => getMessageText(m))
+        .filter((text): text is string => text !== null),
+    );
   }, [threadId]);
 
   // When streaming starts without a baseline (e.g. reconnection, run started
@@ -365,6 +416,11 @@ export function useThreadStream({
   // human message has arrived to avoid clearing before the input message
   // appears in the stream (the input message may arrive via "values" events
   // after individual "messages-tuple" events for AI messages).
+  //
+  // Hardening: the count-based heuristic can mis-fire, so we also clear the
+  // optimistic human message as soon as the server-side copy with the same
+  // text arrives (via the stream or the history endpoint) — this prevents the
+  // user's message from rendering twice (optimistic copy + server copy).
   const optimisticMessageCount = optimisticMessages.length;
   const hasHumanOptimistic = optimisticMessages.some((m) => m.type === "human");
   useEffect(() => {
@@ -372,10 +428,50 @@ export function useThreadStream({
 
     const newHumanMsgArrived = humanMessageCount > prevHumanMsgCountRef.current;
 
-    if (!hasHumanOptimistic || newHumanMsgArrived) {
+    let serverHasSameHuman = false;
+    if (hasHumanOptimistic && !newHumanMsgArrived) {
+      const optimisticHuman = optimisticMessages.find((m) => m.type === "human");
+      const optimisticText = optimisticHuman
+        ? getMessageText(optimisticHuman)
+        : null;
+      if (optimisticText !== null) {
+        // Stream copy: only match human messages that arrived after this
+        // optimistic message was created (not in the pre-send snapshot), so
+        // sending the same text twice cannot clear the new optimistic early.
+        const streamHasIt = thread.messages.some((m) => {
+          if (m.type !== "human") return false;
+          const text = getMessageText(m);
+          return (
+            text !== null &&
+            text === optimisticText &&
+            !prevHumanTextsRef.current.has(text)
+          );
+        });
+        // History fallback: when the stream never delivered the input message
+        // as a "values" event (reload mid-run / shim history), the newest
+        // history human message is the server-side copy of the just-sent one.
+        const historyHasIt = (() => {
+          for (let i = history.length - 1; i >= 0; i--) {
+            const m = history[i];
+            if (!m || m.type !== "human") continue;
+            return getMessageText(m) === optimisticText;
+          }
+          return false;
+        })();
+        serverHasSameHuman = streamHasIt || historyHasIt;
+      }
+    }
+
+    if (!hasHumanOptimistic || newHumanMsgArrived || serverHasSameHuman) {
       setOptimisticMessages([]);
     }
-  }, [hasHumanOptimistic, humanMessageCount, optimisticMessageCount]);
+  }, [
+    hasHumanOptimistic,
+    history,
+    humanMessageCount,
+    optimisticMessageCount,
+    thread.messages,
+  ]);
 
   const sendMessage = useCallback(
     async (
@@ -394,6 +490,14 @@ export function useThreadStream({
       // Capture the current human message count before showing optimistic
       // messages so we can wait for the server's copy of the user input.
       prevHumanMsgCountRef.current = humanMessageCount;
+      // Snapshot the current server-side human texts so the content-based
+      // clear (above) only matches humans that arrive after this send.
+      prevHumanTextsRef.current = new Set(
+        thread.messages
+          .filter((m) => m.type === "human")
+          .map((m) => getMessageText(m))
+          .filter((text): text is string => text !== null),
+      );
       pendingUsageBaselineMessageIdsRef.current = new Set(
         thread.messages
           .map(messageIdentity)

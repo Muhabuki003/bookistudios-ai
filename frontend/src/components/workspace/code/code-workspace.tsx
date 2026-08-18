@@ -5,6 +5,7 @@ import {
   BotIcon,
   CheckCircle2Icon,
   ChevronRightIcon,
+  EyeIcon,
   FileCode2Icon,
   FileIcon,
   FolderIcon,
@@ -133,6 +134,12 @@ export function CodeWorkspace() {
   const [ghLogin, setGhLogin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [prUrl, setPrUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [lastRunSucceeded, setLastRunSucceeded] = useState(false);
+  const [prSubmitting, setPrSubmitting] = useState(false);
+
+  // Set when a polled event is an error; gates the "succeeded" detection.
+  const runFailedRef = useRef(false);
 
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -182,6 +189,9 @@ export function CodeWorkspace() {
       setMsgs([]);
       setFileView(null);
       setPrUrl(null);
+      setPreviewUrl(null);
+      setLastRunSucceeded(false);
+      runFailedRef.current = false;
       setCursor(0);
       setRunId(null);
       await Promise.all([loadTree(pid), loadGit(pid)]);
@@ -246,10 +256,26 @@ export function CodeWorkspace() {
         );
         if (stopped) return;
         setCursor(data.total ?? 0);
+        if (
+          (data.events ?? []).some(
+            (e) => (e as { event?: string })?.event === "error",
+          )
+        ) {
+          runFailedRef.current = true;
+        }
         setMsgs((prev) => applyEvents(prev, data.events ?? []));
         if (data.done) {
           setRunning(false);
-          if (activeIdRef.current) loadGit(activeIdRef.current);
+          if (activeIdRef.current) {
+            loadGit(activeIdRef.current);
+            if (!runFailedRef.current) {
+              // Auto-show the live preview pane on a successful run.
+              setPreviewUrl(
+                `/api/code/projects/${activeIdRef.current}/preview`,
+              );
+              setLastRunSucceeded(true);
+            }
+          }
         }
       } catch {
         /* transient — keep polling */
@@ -322,6 +348,8 @@ export function CodeWorkspace() {
     setCursor(0);
     setRunning(true);
     setRunId(null);
+    runFailedRef.current = false;
+    setLastRunSucceeded(false);
     try {
       const data = await api(`/api/code/projects/${pid}/run`, {
         method: "POST",
@@ -450,6 +478,36 @@ export function CodeWorkspace() {
       loadGit(activeId);
     } catch (e) {
       setError(String(e));
+    }
+  }
+
+  // One-click PR from the run panel: posts with the run's summary as the
+  // commit/PR title and shows the returned PR URL as a link.
+  async function createRunPR() {
+    if (!activeId) return;
+    const lastAgent = [...msgs]
+      .reverse()
+      .find((m) => m.role === "agent" && m.text.trim());
+    const firstLine =
+      (lastAgent?.text ?? "")
+        .split("\n")
+        .map((l) => l.trim())
+        .find(Boolean) ?? "";
+    const title = `Agent changes: ${firstLine.slice(0, 120) || "workspace update"}`;
+    setPrSubmitting(true);
+    setError(null);
+    try {
+      const data = await api(`/api/code/projects/${activeId}/pr`, {
+        method: "POST",
+        body: JSON.stringify({ title, body: lastAgent?.text ?? "" }),
+      });
+      setPrUrl(data.url ?? null);
+      setLastRunSucceeded(false);
+      loadGit(activeId);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setPrSubmitting(false);
     }
   }
 
@@ -728,6 +786,34 @@ export function CodeWorkspace() {
                     </div>
                   </ScrollArea>
 
+                  {/* one-click PR after a successful run */}
+                  {lastRunSucceeded && (
+                    <div className="border-border flex items-center justify-center gap-3 border-t px-4 py-2.5">
+                      <Button
+                        size="sm"
+                        disabled={prSubmitting || !active}
+                        onClick={createRunPR}
+                      >
+                        {prSubmitting ? (
+                          <Loader2Icon className="size-3.5 animate-spin" />
+                        ) : (
+                          <GitPullRequestIcon className="size-3.5" />
+                        )}
+                        Create Pull Request
+                      </Button>
+                      {prUrl && (
+                        <a
+                          href={prUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-[13px] font-medium text-blue-600 hover:underline"
+                        >
+                          <GitPullRequestIcon className="size-3.5" /> PR open ↗
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                   {/* composer */}
                   <div className="px-4 pb-4">
                     <PromptInput
@@ -753,6 +839,36 @@ export function CodeWorkspace() {
               )}
             </div>
           </div>
+
+          {/* live preview pane — auto-shown when a run completes successfully */}
+          {previewUrl && (
+            <div className="border-border flex w-[44%] min-w-[320px] max-w-[620px] shrink-0 flex-col border-l">
+              <div className="border-border flex items-center gap-2 border-b px-3 py-1.5 text-[12px]">
+                <EyeIcon className="size-3.5 text-muted-foreground" />
+                <span className="font-medium">Preview</span>
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground ml-auto text-[11px] hover:underline"
+                >
+                  open in new tab
+                </a>
+                <button
+                  onClick={() => setPreviewUrl(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                  title="Close preview"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              </div>
+              <iframe
+                src={previewUrl}
+                title="Live preview"
+                className="min-h-0 w-full flex-1 bg-white"
+              />
+            </div>
+          )}
         </div>
       )}
 
