@@ -54,6 +54,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [earlyAccessOpen, setEarlyAccessOpen] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -108,7 +109,7 @@ export default function LoginPage() {
         : "/api/v1/auth/register";
       const body = isLogin
         ? `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-        : JSON.stringify({ email, password });
+        : JSON.stringify({ email, password, name: name.trim() });
 
       const headers: HeadersInit = isLogin
         ? { "Content-Type": "application/x-www-form-urlencoded" }
@@ -264,6 +265,21 @@ export default function LoginPage() {
         ) : (
           <>
         <form onSubmit={handleSubmit} className="space-y-2">
+          {!isLogin && (
+            <div className="flex flex-col space-y-1">
+              <label htmlFor="name" className="text-sm font-medium">
+                Name <span className="text-muted-foreground">(optional)</span>
+              </label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="What should we call you?"
+                maxLength={60}
+              />
+            </div>
+          )}
           <div className="flex flex-col space-y-1">
             <label htmlFor="email" className="text-sm font-medium">
               Email

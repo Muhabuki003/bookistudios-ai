@@ -8,6 +8,7 @@ export const userSchema = z.object({
   system_role: z.enum(["admin", "user"]),
   needs_setup: z.boolean().optional().default(false),
   verified: z.boolean().optional(),
+  name: z.string().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;

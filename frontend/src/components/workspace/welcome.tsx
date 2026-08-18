@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { useAuth } from "@/core/auth/AuthProvider";
 import { useI18n } from "@/core/i18n/hooks";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +15,14 @@ export function Welcome({
   mode?: "ultra" | "pro" | "thinking" | "flash";
 }) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const isUltra = useMemo(() => mode === "ultra", [mode]);
   const isSkillMode = searchParams.get("mode") === "skill";
+  const name = user?.name?.trim();
+  const greeting = name
+    ? t.welcome.greetingWithName.replace("{name}", name)
+    : t.welcome.greeting;
   return (
     <div
       className={cn(
@@ -30,7 +36,7 @@ export function Welcome({
           isUltra ? "golden-text" : "text-foreground",
         )}
       >
-        {isSkillMode ? t.welcome.createYourOwnSkill : t.welcome.greeting}
+        {isSkillMode ? t.welcome.createYourOwnSkill : greeting}
       </div>
       {isSkillMode && (
         <div className="text-muted-foreground text-sm">

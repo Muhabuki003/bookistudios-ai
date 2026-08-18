@@ -62,6 +62,7 @@ export const enUS: Translations = {
   // Welcome
   welcome: {
     greeting: "What's next?",
+    greetingWithName: "What's next, {name}?",
     createYourOwnSkill: "Create Your Own Skill",
     createYourOwnSkillDescription:
       "Create your own skill to release the power of bookistudios AI. With customized skills,\nbookistudios AI can help you search on the web, analyze data, and generate\n artifacts like slides, web pages and do almost anything.",
@@ -482,6 +483,9 @@ export const enUS: Translations = {
       profileTitle: "Profile",
       email: "Email",
       role: "Role",
+      displayName: "What should we call you?",
+      nameSaved: "Name saved",
+      save: "Save",
       changePasswordTitle: "Change Password",
       changePasswordDescription: "Update your account password.",
       currentPassword: "Current password",

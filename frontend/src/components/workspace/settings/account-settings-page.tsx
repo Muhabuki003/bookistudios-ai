@@ -13,7 +13,7 @@ import { useI18n } from "@/core/i18n/hooks";
 import { SettingsSection } from "./settings-section";
 
 export function AccountSettingsPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const { t } = useI18n();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -21,6 +21,38 @@ export function AccountSettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.name ?? "");
+  const [nameMessage, setNameMessage] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [savingName, setSavingName] = useState(false);
+
+  const handleSaveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNameError("");
+    setNameMessage("");
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/v1/auth/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...getCsrfHeaders(),
+        },
+        body: JSON.stringify({ name: displayName.trim().slice(0, 60) }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setNameError(parseAuthError(data).message);
+        return;
+      }
+      await refreshUser();
+      setNameMessage(t.settings.account.nameSaved);
+    } catch {
+      setNameError(t.settings.account.networkError);
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,6 +116,35 @@ export function AccountSettingsPage() {
               {user?.system_role ?? "—"}
             </span>
           </div>
+          <form
+            onSubmit={handleSaveName}
+            className="grid grid-cols-[max-content_max-content] items-center gap-4 pt-1"
+          >
+            <span className="text-muted-foreground text-sm">
+              {t.settings.account.displayName}
+            </span>
+            <div className="flex items-center gap-2">
+              <Input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Alex"
+                maxLength={60}
+                className="w-52"
+              />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={savingName}
+              >
+                {savingName ? t.settings.account.updating : t.settings.account.save}
+              </Button>
+            </div>
+          </form>
+          {nameError && <p className="text-sm text-red-500">{nameError}</p>}
+          {nameMessage && (
+            <p className="text-sm text-green-500">{nameMessage}</p>
+          )}
         </div>
       </SettingsSection>
 

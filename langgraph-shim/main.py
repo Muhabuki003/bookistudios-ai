@@ -38,11 +38,21 @@ DEEPSEEK_BASE = os.environ.get("LLM_BASE_URL", "https://api.deepseek.com/v1")
 MODEL = os.environ.get("LLM_MODEL", "deepseek-chat")
 SYSTEM_PROMPT = os.environ.get(
     "LLM_SYSTEM_PROMPT",
-    "You are the BookiStudios AI office assistant. Be helpful, direct and concise. "
-    "Adrien Muhabuki, also known as Adrien or Buki, is the user and creator of "
-    "BookiStudios AI. Recognize Adrien, Buki, and Adrien Muhabuki as the same "
-    "person, and remember this for every account and conversation.",
+    "You are the BookiStudios AI office assistant. Be helpful, direct and concise.",
 )
+
+USERS_FILE = Path("/root/bookistudios-ai/office-data/office_users.json")
+
+
+def _user_name(email: str) -> str:
+    """Display name for the account, from the office users file (never the
+    hardcoded owner identity — every account is its own user)."""
+    try:
+        users = json.loads(USERS_FILE.read_text())
+        rec = users.get(email) or {}
+        return str(rec.get("name", "")).strip()
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return ""
 
 def _load_api_key() -> str:
     key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
@@ -182,8 +192,22 @@ def _flatten_content(content) -> str:
     return str(content or "")
 
 
-def _to_openai_messages(thread_messages: list, new_messages: list) -> list:
-    out = [{"role": "system", "content": SYSTEM_PROMPT}]
+def _to_openai_messages(thread_messages: list, new_messages: list, email: str | None = None) -> list:
+    prompt = SYSTEM_PROMPT
+    if email:
+        name = _user_name(email)
+        if name:
+            prompt += (
+                f" The person you are speaking with is {name} (account {email}). "
+                "Address them by name when natural. Do not assume they are anyone "
+                "other than the account owner."
+            )
+        else:
+            prompt += (
+                f" The person you are speaking with uses the account {email}. "
+                "Do not assume they are anyone other than the account owner."
+            )
+    out = [{"role": "system", "content": prompt}]
     for m in thread_messages + new_messages:
         mtype = m.get("type") or m.get("role", "human")
         role = {"human": "user", "ai": "assistant", "system": "system"}.get(mtype)
@@ -313,7 +337,7 @@ async def run_stream(request: Request, thread_id: str, body: dict):
             msg["additional_kwargs"] = m["additional_kwargs"]
         human_msgs.append(msg)
 
-    openai_messages = _to_openai_messages(thread.get("messages", []), human_msgs)
+    openai_messages = _to_openai_messages(thread.get("messages", []), human_msgs, email)
 
     with LOCK:
         thread["messages"].extend(human_msgs)

@@ -50,6 +50,7 @@ export interface Translations {
   // Welcome
   welcome: {
     greeting: string;
+    greetingWithName: string;
     createYourOwnSkill: string;
     createYourOwnSkillDescription: string;
   };
@@ -400,6 +401,9 @@ export interface Translations {
       profileTitle: string;
       email: string;
       role: string;
+      displayName: string;
+      nameSaved: string;
+      save: string;
       changePasswordTitle: string;
       changePasswordDescription: string;
       currentPassword: string;

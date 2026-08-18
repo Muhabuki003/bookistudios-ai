@@ -62,6 +62,7 @@ export const zhCN: Translations = {
   // Welcome
   welcome: {
     greeting: "接下来做什么？",
+    greetingWithName: "接下来做什么，{name}？",
     createYourOwnSkill: "创建你自己的 Agent SKill",
     createYourOwnSkillDescription:
       "创建你的 Agent Skill 来释放 bookistudios AI 的潜力。通过自定义技能，bookistudios AI\n可以帮你搜索网络、分析数据，还能为你生成幻灯片、\n网页等作品，几乎可以做任何事情。",
@@ -462,6 +463,9 @@ export const zhCN: Translations = {
       profileTitle: "个人信息",
       email: "邮箱",
       role: "角色",
+      displayName: "你希望我们怎么称呼你？",
+      nameSaved: "名称已保存",
+      save: "保存",
       changePasswordTitle: "修改密码",
       changePasswordDescription: "更新你的账号密码。",
       currentPassword: "当前密码",
