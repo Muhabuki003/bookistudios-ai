@@ -1,7 +1,38 @@
 ---
 title: 模型厂商服务接入
-description: 已支持模型厂商服务的接入参考文档。
-asIndexPage: true
+description: bookistudios AI 支持的模型厂商服务的接入参考文档。
 ---
 
-# 更多模型厂商服务接入
+import { Callout, Cards } from "nextra/components";
+
+# 模型厂商服务接入
+
+bookistudios AI 通过 OpenAI 兼容的端点运行 LLM 提供商。提供商通过 Base URL 和 API 密钥配置；模型使用提供商特定的模型 ID 或端点 ID 来引用。
+
+<Callout type="info" emoji="🔌">
+  任何提供 OpenAI 兼容聊天或响应 API 的服务都可以接入 — 本节中的页面记录了经
+  验证可与 bookistudios AI 良好配合的集成。
+</Callout>
+
+## 已支持的提供商
+
+<Cards num={2}>
+  <Cards.Card title="火山方舟" href="/docs/reference/model-providers/ark" />
+</Cards>
+
+## 提供商配置方式
+
+提供商设置位于配置文件中的模型提供商部分：
+
+```yaml
+model_provider:
+  base_url: https://...
+  api_key_env: PROVIDER_API_KEY
+  model: provider-model-id
+```
+
+API 密钥通过 `api_key_env` 指定的环境变量读取 — 密钥永远不会存储在配置文件本身中。完整的配置参考见[配置](/docs/harness/configuration)。
+
+## 添加新的提供商
+
+大多数 OpenAI 兼容服务开箱即用：将 `base_url` 设置为服务端点，将 `api_key_env` 指向你的密钥，并使用服务的模型标识符。如果你有希望在此记录的提供商，集成指南涵盖了具体的接入方式。

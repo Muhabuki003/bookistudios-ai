@@ -1,0 +1,91 @@
+---
+title: 设置
+description: 开始使用 bookistudios AI 所需的一切 — 前置条件、环境准备，以及两种使用方式：基于 Harness 构建或运行应用。
+---
+
+import { Callout, Cards, Steps } from "nextra/components";
+
+# 设置
+
+本页面汇总了开始使用 bookistudios AI 所需的一切。根据你的目标选择一条路径：
+
+- **构建你自己的 Agent 系统** → [Harness](/docs/harness)，一个 Python SDK 和运行时基础。
+- **将 bookistudios AI 作为产品运行** → [应用](/docs/application)，一个基于 Harness 构建、可直接部署的应用。
+
+## 前置条件
+
+无论选择哪条路径，你都需要一台具备以下工具的机器：
+
+| 工具 | 最低版本 |
+| ------- | -------- |
+| Python  | 3.12     |
+| uv      | latest   |
+| Node.js | 22       |
+| pnpm    | 10       |
+| nginx   | 任意较新版本 |
+| LLM API 密钥 | 一个提供商（OpenAI 兼容） |
+
+在 macOS 上，使用 `brew install python uv node pnpm nginx` 安装。在 Linux 上，使用你的发行版包管理器。
+
+## 方案 A — 基于 Harness 构建
+
+bookistudios AI Harness 是用于在自己的产品或工作流中组合 Agent 与技能、记忆、工具、沙箱和子 Agent 的 Python SDK 和运行时。
+
+<Callout type="info" emoji="📦">
+  Harness 包尚未发布。包发布后，安装说明会添加到 [Install](/docs/harness) 页面。
+</Callout>
+
+等待期间，你仍然可以学习架构：
+
+<Cards num={2}>
+  <Cards.Card title="安装" href="/docs/harness" />
+  <Cards.Card title="快速上手" href="/docs/harness/quick-start" />
+  <Cards.Card title="设计原则" href="/docs/harness/design-principles" />
+  <Cards.Card title="配置" href="/docs/harness/configuration" />
+</Cards>
+
+## 方案 B — 运行应用
+
+bookistudios AI 应用是完整的应用层：认证、工作区、Agent、计费和部署工具，全部连接到 Harness 运行时。
+
+<Steps>
+
+### 克隆仓库
+
+```bash
+git clone https://github.com/Muhabuki003/bookistudios-ai.git
+cd bookistudios-ai
+```
+
+### 检查并安装依赖
+
+```bash
+make check
+make install
+```
+
+### 创建配置文件
+
+```bash
+cp config.example.yaml config.yaml
+```
+
+然后将你的 LLM API 密钥添加到配置中。
+
+### 启动所有服务
+
+```bash
+make dev
+```
+
+所有服务会一起启动，并通过一个 URL 访问。完整的操作说明见[应用快速上手](/docs/application/quick-start)。
+
+</Steps>
+
+## 下一步
+
+<Cards num={3}>
+  <Cards.Card title="应用快速上手" href="/docs/application/quick-start" />
+  <Cards.Card title="部署指南" href="/docs/application/deployment-guide" />
+  <Cards.Card title="教程" href="/docs/tutorials" />
+</Cards>

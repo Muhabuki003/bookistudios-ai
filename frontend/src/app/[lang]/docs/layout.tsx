@@ -24,11 +24,34 @@ function formatPageRoute(base: string, items: PageMapItem[]): PageMapItem[] {
   });
 }
 
+// The Nextra page map also picks up the app's own routes (billing, pricing,
+// workspace, login, confirm-email, blog, posts). Prefixed with /<lang>/docs
+// they render as sidebar links that 404 — keep the docs sidebar to actual
+// docs content only.
+const APP_ROUTE_FILTER =
+  /^\/(?:billing|pricing|workspace|login|confirm-email|blog|posts)(?:\/|$)/;
+
+function isAppRoute(route: string): boolean {
+  const stripped = route.replace(/^\/[a-z]{2}(?=\/|$)/, "");
+  return APP_ROUTE_FILTER.test(stripped);
+}
+
+function filterAppRoutes(items: PageMapItem[]): PageMapItem[] {
+  return items
+    .filter((item) => !("route" in item) || !isAppRoute(item.route))
+    .map((item) => {
+      if ("children" in item && item.children) {
+        return { ...item, children: filterAppRoutes(item.children) };
+      }
+      return item;
+    });
+}
+
 export default async function DocLayout({ children, params }) {
   const { lang } = await params;
   const locale = getLocaleByLang(lang);
   const pages = await getPageMap(`/${lang}`);
-  const pageMap = formatPageRoute(`/${lang}/docs`, pages);
+  const pageMap = formatPageRoute(`/${lang}/docs`, filterAppRoutes(pages));
 
   return (
     <Layout

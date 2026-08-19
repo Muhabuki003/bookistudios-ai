@@ -1,8 +1,52 @@
 ---
 title: 火山方舟
-description: 火山方舟模型接入指南。
+description: 火山方舟模型接入指南 — 字节跳动的 OpenAI 兼容模型服务平台。
 ---
+
+import { Callout } from "nextra/components";
 
 # 火山方舟
 
-## Coding Plan
+[火山方舟](https://www.volcengine.com/product/ark) 是字节跳动的模型服务平台。它提供 OpenAI 兼容的 API，因此可以作为标准提供商与 bookistudios AI 一起使用。
+
+<Callout type="info" emoji="🚀">
+  方舟提供豆包系列模型（doubao-pro、doubao-lite、doubao-vision）以及开源模型。
+  你可以通过端点 ID 来引用模型，端点 ID 在方舟控制台创建。
+</Callout>
+
+## 配置
+
+| 设置 | 值 |
+| ------------ | ---------------------------------------- |
+| Base URL | `https://ark.cn-beijing.volces.com/api/v3` |
+| API 密钥 | `ARK_API_KEY`（环境变量） |
+| 模型 ID | 你的方舟端点 ID（例如 `ep-20240xxx`） |
+
+### 第一步 — 创建端点
+
+1. 登录[火山引擎控制台](https://console.volcengine.com/ark)并打开**方舟**。
+2. 在**模型推理 → 在线推理**下，为你想要使用的模型创建端点。
+3. 复制端点 ID — 它以 `ep-` 开头，即你的 `model` 值。
+
+### 第二步 — 设置 API 密钥
+
+在方舟控制台的**API Key 管理**下创建 API 密钥，然后导出：
+
+```bash
+export ARK_API_KEY="your-ark-api-key"
+```
+
+### 第三步 — 将 bookistudios AI 指向方舟
+
+```yaml
+model_provider:
+  base_url: https://ark.cn-beijing.volces.com/api/v3
+  api_key_env: ARK_API_KEY
+  model: ep-20240xxxxx  # 你的端点 ID
+```
+
+## 注意事项
+
+- 端点是 OpenAI 兼容的 — 无需代理或适配器。
+- 模型容量和速率限制在方舟控制台中按端点管理。
+- 如果更换模型，创建新端点并更新 `model` 值即可 — 无需其他配置更改。

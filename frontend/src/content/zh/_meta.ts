@@ -4,6 +4,9 @@ const meta: MetaRecord = {
   index: {
     title: "概览",
   },
+  setup: {
+    title: "设置",
+  },
   introduction: {
     title: "简介",
   },
@@ -18,21 +21,6 @@ const meta: MetaRecord = {
   },
   reference: {
     title: "参考",
-  },
-  workspace: {
-    type: "page",
-  },
-  blog: {
-    type: "page",
-  },
-  posts: {
-    type: "page",
-  },
-  login: {
-    type: "page",
-  },
-  setup: {
-    type: "page",
   },
 };
 

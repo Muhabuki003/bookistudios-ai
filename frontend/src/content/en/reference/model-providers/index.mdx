@@ -1,7 +1,39 @@
 ---
 title: Model providers
-description: Integration references for supported model provider services.
-asIndexPage: true
+description: Integration references for the model provider services bookistudios AI supports.
 ---
 
+import { Callout, Cards } from "nextra/components";
+
 # Model providers
+
+bookistudios AI runs agents on LLM providers through OpenAI-compatible endpoints. A provider is configured with a base URL and an API key; models are addressed by their provider-specific model or endpoint ID.
+
+<Callout type="info" emoji="🔌">
+  Any provider that exposes an OpenAI-compatible chat or responses API can be
+  wired in — the pages in this section document the integrations that are known
+  to work well with bookistudios AI.
+</Callout>
+
+## Supported providers
+
+<Cards num={2}>
+  <Cards.Card title="Volcano Ark" href="/docs/reference/model-providers/ark" />
+</Cards>
+
+## How provider configuration works
+
+Provider settings live in the config file under the model provider section:
+
+```yaml
+model_provider:
+  base_url: https://...
+  api_key_env: PROVIDER_API_KEY
+  model: provider-model-id
+```
+
+The API key is read from the environment variable named by `api_key_env` — keys are never stored in the config file itself. See [Configuration](/docs/harness/configuration) for the full configuration reference.
+
+## Adding a new provider
+
+Most OpenAI-compatible services work out of the box: set `base_url` to the service endpoint, point `api_key_env` at your key, and use the service's model identifier. If you have a provider you would like documented here, the integration guide covers the exact wiring.

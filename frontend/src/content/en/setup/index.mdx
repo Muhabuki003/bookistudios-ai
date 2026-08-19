@@ -1,0 +1,92 @@
+---
+title: Setup
+description: Everything you need to get started with bookistudios AI — prerequisites, environment preparation, and the two ways to use it: build on the Harness or run the App.
+---
+
+import { Callout, Cards, Steps } from "nextra/components";
+
+# Setup
+
+This page brings together everything you need to get started with bookistudios AI. Depending on what you want to do, pick one path:
+
+- **Build your own agent system** → the [Harness](/docs/harness), a Python SDK and runtime foundation.
+- **Run bookistudios AI as a product** → the [App](/docs/application), a ready-to-deploy application built on the Harness.
+
+## Prerequisites
+
+Whatever path you choose, you need a machine with:
+
+| Tool    | Minimum version    |
+| ------- | ------------------ |
+| Python  | 3.12               |
+| uv      | latest             |
+| Node.js | 22                 |
+| pnpm    | 10                 |
+| nginx   | any recent version |
+| LLM API key | one provider (OpenAI-compatible) |
+
+On macOS, install with `brew install python uv node pnpm nginx`. On Linux, use your distribution's package manager.
+
+## Option A — Build on the Harness
+
+The bookistudios AI Harness is the Python SDK and runtime for composing agents with skills, memory, tools, sandboxes, and subagents inside your own product or workflow.
+
+<Callout type="info" emoji="📦">
+  The Harness package is not released yet. Installation instructions will be added
+  to the [Install](/docs/harness) page as soon as the package is published.
+</Callout>
+
+While you wait, you can still learn the architecture:
+
+<Cards num={2}>
+  <Cards.Card title="Install" href="/docs/harness" />
+  <Cards.Card title="Quick Start" href="/docs/harness/quick-start" />
+  <Cards.Card title="Design Principles" href="/docs/harness/design-principles" />
+  <Cards.Card title="Configuration" href="/docs/harness/configuration" />
+</Cards>
+
+## Option B — Run the App
+
+The bookistudios AI App is the complete application layer: auth, workspaces, agents, billing, and deployment tooling, all wired to the Harness runtime.
+
+<Steps>
+
+### Clone the repository
+
+```bash
+git clone https://github.com/Muhabuki003/bookistudios-ai.git
+cd bookistudios-ai
+```
+
+### Check and install dependencies
+
+```bash
+make check
+make install
+```
+
+### Create your config
+
+```bash
+cp config.example.yaml config.yaml
+```
+
+Then add your LLM API key to the config.
+
+### Start everything
+
+```bash
+make dev
+```
+
+All services start together and are accessible through a single URL. See the [App Quick Start](/docs/application/quick-start) for the full walkthrough.
+
+</Steps>
+
+## Where to go next
+
+<Cards num={3}>
+  <Cards.Card title="App Quick Start" href="/docs/application/quick-start" />
+  <Cards.Card title="Deployment Guide" href="/docs/application/deployment-guide" />
+  <Cards.Card title="Tutorials" href="/docs/tutorials" />
+</Cards>

@@ -1,8 +1,53 @@
 ---
 title: Volcano Ark
-description: Integration guide for the Volcano Ark model provider.
+description: Integration guide for the Volcano Ark (火山方舟) model provider — ByteDance's OpenAI-compatible model service.
 ---
+
+import { Callout, Cards } from "nextra/components";
 
 # Volcano Ark
 
-## Coding Plan
+[Volcano Ark](https://www.volcengine.com/product/ark) (火山方舟) is ByteDance's model service platform. It exposes an OpenAI-compatible API, so it can be used with bookistudios AI as a standard provider.
+
+<Callout type="info" emoji="🚀">
+  Ark serves models such as the Doubao family (doubao-pro, doubao-lite, doubao-vision)
+  and hosts open-weight models. You address a model by its endpoint ID, which you
+  create in the Ark console.
+</Callout>
+
+## Configuration
+
+| Setting      | Value                                    |
+| ------------ | ---------------------------------------- |
+| Base URL     | `https://ark.cn-beijing.volces.com/api/v3` |
+| API key      | `ARK_API_KEY` (environment variable)     |
+| Model ID     | Your Ark endpoint ID (e.g. `ep-20240xxx`) |
+
+### Step 1 — Create an endpoint
+
+1. Sign in to the [Volcano Engine console](https://console.volcengine.com/ark) and open **Ark**.
+2. Under **Model Inference → Online Inference**, create an endpoint for the model you want to use.
+3. Copy the endpoint ID — it starts with `ep-` and is your `model` value.
+
+### Step 2 — Set the API key
+
+Create the API key in the Ark console under **API Key Management**, then export it:
+
+```bash
+export ARK_API_KEY="your-ark-api-key"
+```
+
+### Step 3 — Point bookistudios AI at Ark
+
+```yaml
+model_provider:
+  base_url: https://ark.cn-beijing.volces.com/api/v3
+  api_key_env: ARK_API_KEY
+  model: ep-20240xxxxx  # your endpoint ID
+```
+
+## Notes
+
+- The endpoint is OpenAI-compatible — no proxy or adapter is required.
+- Model capacity and rate limits are managed per endpoint in the Ark console.
+- If you switch models, create a new endpoint and update the `model` value — no other configuration changes.

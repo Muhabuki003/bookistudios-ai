@@ -4,6 +4,9 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
+  setup: {
+    title: "Setup",
+  },
   introduction: {
     title: "Introduction",
   },
@@ -18,21 +21,6 @@ const meta: MetaRecord = {
   },
   reference: {
     title: "Reference",
-  },
-  workspace: {
-    type: "page",
-  },
-  blog: {
-    type: "page",
-  },
-  posts: {
-    type: "page",
-  },
-  login: {
-    type: "page",
-  },
-  setup: {
-    type: "page",
   },
 };
 
