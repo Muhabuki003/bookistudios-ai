@@ -123,7 +123,7 @@ export default function DesignPage() {
         }
 
         for (const p of projects) {
-          const c = current[p.id];
+          const c = current[p.id] ?? {};
           const st = c.status ?? "unknown";
           const prev = known.current[p.id];
           const changed =
