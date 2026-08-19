@@ -41,15 +41,10 @@ export function WorkspaceNavChatList() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            isActive={pathname.startsWith("/design")}
+            isActive={pathname.startsWith("/workspace/design")}
             asChild
           >
-            <Link
-              className="text-muted-foreground"
-              href="https://design.bsaiagents.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link className="text-muted-foreground" href="/workspace/design">
               <PenToolIcon />
               <span>{t.sidebar.design}</span>
             </Link>
