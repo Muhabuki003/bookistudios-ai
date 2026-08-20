@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { BrainArcBackground } from "@/components/ui/brain-arc-background";
+import { BrainProcessBackground } from "@/components/ui/brain-process-background";
 import { Input } from "@/components/ui/input";
 import { getCsrfHeaders } from "@/core/api/fetcher";
 import { useAuth } from "@/core/auth/AuthProvider";
@@ -152,7 +152,7 @@ export default function SetupPage() {
   if (mode === "init_admin") {
     return (
       <div className="bg-background flex min-h-screen items-center justify-center">
-        <BrainArcBackground className="absolute inset-x-0 bottom-8 h-[16vh] w-full opacity-[0.35]" />
+        <BrainProcessBackground className="absolute inset-x-0 bottom-6 h-[22vh] w-full opacity-[0.3]" />
         <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
           <div className="text-center">
             <h1 className="font-serif text-3xl">bookistudios AI</h1>
@@ -216,7 +216,7 @@ export default function SetupPage() {
   // ── Change-password form (needs_setup after login) ─────────────────
   return (
     <div className="bg-background flex min-h-screen items-center justify-center">
-      <BrainArcBackground className="absolute inset-x-0 bottom-8 h-[16vh] w-full opacity-[0.35]" />
+      <BrainProcessBackground className="absolute inset-x-0 bottom-6 h-[22vh] w-full opacity-[0.3]" />
       <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
         <div className="text-center">
           <h1 className="font-serif text-3xl">bookistudios AI</h1>

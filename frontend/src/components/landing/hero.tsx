@@ -4,7 +4,7 @@ import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { BrainArcBackground } from "@/components/ui/brain-arc-background";
+import { BrainProcessBackground } from "@/components/ui/brain-process-background";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { env } from "@/env";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ export function Hero({ className }: { className?: string }) {
       )}
     >
       <div className="absolute inset-0 z-0 bg-[#080808]">
-        <BrainArcBackground className="absolute inset-x-0 bottom-[8%] h-[18vh] w-full opacity-[0.65]" />
+        <BrainProcessBackground className="absolute inset-x-0 bottom-[6%] h-[26vh] w-full opacity-[0.5]" />
       </div>
       <div className="container-md relative z-10 mx-auto flex h-screen flex-col items-center justify-center">
         <h1 className="flex items-center gap-2 text-4xl font-bold md:text-6xl">
