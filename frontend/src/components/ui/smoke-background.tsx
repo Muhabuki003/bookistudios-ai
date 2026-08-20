@@ -47,7 +47,7 @@ export function SmokeBackground({ className }: { className?: string }) {
     const tone = (n: number) =>
       (1 - Math.pow(2, -n * 0.005 * EXPOSURE)) * 255;
     const nz = (x: number, y: number, c: number) =>
-      nd[(((x | 0) + (y | 0) * W) * 4 + c) % Math.max(1, nd.length)] / 127 -
+      nd[(((x | 0) + (y | 0) * W) * 4 + c) % Math.max(1, nd.length)]! / 127 -
       1.0;
     const fz = (r: number, b = 0) => b + (Math.random() - 0.5) * r * 2;
 
@@ -138,17 +138,17 @@ export function SmokeBackground({ className }: { className?: string }) {
           const row = y * W;
           for (let x = edge; x < W; x++) {
             const k = (row + x) * 4;
-            if (hdr[k] < 0.02 && hdr[k + 1] < 0.02 && hdr[k + 2] < 0.02) continue;
-            hdr[k] *= 0.8;
-            hdr[k + 1] *= 0.8;
-            hdr[k + 2] *= 0.8;
-            data[k] = tone(hdr[k]);
-            data[k + 1] = tone(hdr[k + 1]);
-            data[k + 2] = tone(hdr[k + 2]);
+            if (hdr[k]! < 0.02 && hdr[k + 1]! < 0.02 && hdr[k + 2]! < 0.02) continue;
+            hdr[k] = hdr[k]! * 0.8;
+            hdr[k + 1] = hdr[k + 1]! * 0.8;
+            hdr[k + 2] = hdr[k + 2]! * 0.8;
+            data[k] = tone(hdr[k]!);
+            data[k + 1] = tone(hdr[k + 1]!);
+            data[k + 2] = tone(hdr[k + 2]!);
           }
         }
         for (let i = parts.length - 1; i >= 0; i--)
-          if (parts[i].x > ex) parts.splice(i, 1);
+          if (parts[i]!.x > ex) parts.splice(i, 1);
         ectx.putImageData(img, 0, 0);
       }
 
@@ -158,7 +158,7 @@ export function SmokeBackground({ className }: { className?: string }) {
 
         const alive: Particle[] = [];
         for (let i = 0; i < parts.length; i++) {
-          const p = parts[i];
+          const p = parts[i]!;
           p.vx =
             p.vx * DAMPING +
             nz(Math.min(Math.max(p.x, 0), W - 1), Math.min(Math.max(p.y, 0), H - 1), 0) *
@@ -175,9 +175,12 @@ export function SmokeBackground({ className }: { className?: string }) {
             p.y += p.vy * 0.1;
             if (p.x < 1 || p.x > W - 2 || p.y < 1 || p.y > H - 2) break;
             const k = ((p.x | 0) + (p.y | 0) * W) * 4;
-            data[k] = tone((hdr[k] += COL.r));
-            data[k + 1] = tone((hdr[k + 1] += COL.g));
-            data[k + 2] = tone((hdr[k + 2] += COL.b));
+            hdr[k] = (hdr[k] ?? 0) + COL.r;
+            hdr[k + 1] = (hdr[k + 1] ?? 0) + COL.g;
+            hdr[k + 2] = (hdr[k + 2] ?? 0) + COL.b;
+            data[k] = tone(hdr[k]!);
+            data[k + 1] = tone(hdr[k + 1]!);
+            data[k + 2] = tone(hdr[k + 2]!);
           }
           if (p.age < MAX_AGE) alive.push(p);
         }
