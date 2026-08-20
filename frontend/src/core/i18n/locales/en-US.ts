@@ -171,59 +171,10 @@ export const enUS: Translations = {
     chats: "Chats",
     recentChats: "Recent chats",
     demoChats: "Demo chats",
-    agents: "Agents",
     design: "Design",
     code: "Code",
   },
 
-  // Agents
-  agents: {
-    title: "Agents",
-    description:
-      "Create and manage custom agents with specialized prompts and capabilities.",
-    newAgent: "New Agent",
-    emptyTitle: "No custom agents yet",
-    emptyDescription:
-      "Create your first custom agent with a specialized system prompt.",
-    chat: "Chat",
-    delete: "Delete",
-    deleteConfirm:
-      "Are you sure you want to delete this agent? This action cannot be undone.",
-    deleteSuccess: "Agent deleted",
-    newChat: "New chat",
-    createPageTitle: "Design your Agent",
-    createPageSubtitle:
-      "Describe the agent you want — I'll help you create it through conversation.",
-    nameStepTitle: "Name your new Agent",
-    nameStepHint:
-      "Letters, digits, and hyphens only — stored lowercase (e.g. code-reviewer)",
-    nameStepPlaceholder: "e.g. code-reviewer",
-    nameStepContinue: "Continue",
-    nameStepInvalidError:
-      "Invalid name — use only letters, digits, and hyphens",
-    nameStepAlreadyExistsError: "An agent with this name already exists",
-    nameStepNetworkError:
-      "Network request failed — check your network or backend connection",
-    nameStepCheckError: "Could not verify name availability — please try again",
-    nameStepApiDisabledError:
-      "Custom agent management is not enabled on this server. Please contact your administrator.",
-    nameStepBootstrapMessage:
-      "The new custom agent name is {name}. Help me design its purpose, behavior, and SOUL.md before saving it.",
-    save: "Save agent",
-    saving: "Saving agent...",
-    saveRequested:
-      "Save requested. bookistudios AI is generating and saving an initial version now.",
-    saveHint:
-      "You can save this agent at any time from the top-right menu, even if this is only a first draft.",
-    saveCommandMessage:
-      "Please save this custom agent now based on everything we have discussed so far. Treat this as my explicit confirmation to save. If some details are still missing, make reasonable assumptions, generate a concise first SOUL.md in English, and call setup_agent immediately without asking me for more confirmation.",
-    agentCreatedPendingRefresh:
-      "The agent was created, but bookistudios AI could not load it yet. Please refresh this page in a moment.",
-    more: "More actions",
-    agentCreated: "Agent created!",
-    startChatting: "Start chatting",
-    backToGallery: "Back to Gallery",
-  },
 
   // Breadcrumb
   breadcrumb: {

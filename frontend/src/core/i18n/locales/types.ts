@@ -117,46 +117,10 @@ export interface Translations {
     newChat: string;
     chats: string;
     demoChats: string;
-    agents: string;
     design: string;
     code: string;
   };
 
-  // Agents
-  agents: {
-    title: string;
-    description: string;
-    newAgent: string;
-    emptyTitle: string;
-    emptyDescription: string;
-    chat: string;
-    delete: string;
-    deleteConfirm: string;
-    deleteSuccess: string;
-    newChat: string;
-    createPageTitle: string;
-    createPageSubtitle: string;
-    nameStepTitle: string;
-    nameStepHint: string;
-    nameStepPlaceholder: string;
-    nameStepContinue: string;
-    nameStepInvalidError: string;
-    nameStepAlreadyExistsError: string;
-    nameStepNetworkError: string;
-    nameStepCheckError: string;
-    nameStepApiDisabledError: string;
-    nameStepBootstrapMessage: string;
-    save: string;
-    saving: string;
-    saveRequested: string;
-    saveHint: string;
-    saveCommandMessage: string;
-    agentCreatedPendingRefresh: string;
-    more: string;
-    agentCreated: string;
-    startChatting: string;
-    backToGallery: string;
-  };
 
   // Breadcrumb
   breadcrumb: {

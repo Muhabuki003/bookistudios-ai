@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import { EarlyAccessModal } from "@/components/early-access-modal";
 import { Button } from "@/components/ui/button";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { VeinsBackground } from "@/components/ui/veins-background";
 import { Input } from "@/components/ui/input";
 import { setBsaiUserCookie } from "@/components/workspace/bsai-user-cookie";
 import { useAuth } from "@/core/auth/AuthProvider";
@@ -202,13 +202,9 @@ export default function LoginPage() {
 
   return (
     <div className="bg-background flex min-h-screen items-center justify-center">
-      <FlickeringGrid
-        className="absolute inset-0 z-0 mask-[url(/images/deer.svg)] mask-size-[100vw] mask-center mask-no-repeat md:mask-size-[72vh]"
-        squareSize={4}
-        gridGap={4}
-        color={actualTheme === "dark" ? "white" : "black"}
-        maxOpacity={0.3}
-        flickerChance={0.25}
+      <VeinsBackground
+        className="absolute inset-0 z-0"
+        light={actualTheme === "light"}
       />
       <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
         <div className="text-center">

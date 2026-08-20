@@ -165,53 +165,10 @@ export const zhCN: Translations = {
     chats: "对话",
     recentChats: "最近的对话",
     demoChats: "演示对话",
-    agents: "智能体",
     design: "设计",
     code: "代码",
   },
 
-  // Agents
-  agents: {
-    title: "智能体",
-    description: "创建和管理具有专属 Prompt 与能力的自定义智能体。",
-    newAgent: "新建智能体",
-    emptyTitle: "还没有自定义智能体",
-    emptyDescription: "创建你的第一个自定义智能体，设置专属系统提示词。",
-    chat: "对话",
-    delete: "删除",
-    deleteConfirm: "确定要删除该智能体吗？此操作不可撤销。",
-    deleteSuccess: "智能体已删除",
-    newChat: "新对话",
-    createPageTitle: "设计你的智能体",
-    createPageSubtitle: "描述你想要的智能体，我来帮你通过对话创建。",
-    nameStepTitle: "给新智能体起个名字",
-    nameStepHint:
-      "只允许字母、数字和连字符，存储时自动转为小写（例如 code-reviewer）",
-    nameStepPlaceholder: "例如 code-reviewer",
-    nameStepContinue: "继续",
-    nameStepInvalidError: "名称无效，只允许字母、数字和连字符",
-    nameStepAlreadyExistsError: "已存在同名智能体",
-    nameStepNetworkError: "网络请求失败，请检查网络或后端连接",
-    nameStepCheckError: "无法验证名称可用性，请稍后重试",
-    nameStepApiDisabledError:
-      "服务器未开启自定义智能体管理功能，请联系管理员。",
-    nameStepBootstrapMessage:
-      "新智能体的名称是 {name}。请先帮我设计它的用途、行为方式和 SOUL.md，再保存它。",
-    save: "保存智能体",
-    saving: "正在保存智能体...",
-    saveRequested:
-      "已提交保存请求，bookistudios AI 正在根据当前对话生成并保存初版智能体。",
-    saveHint:
-      "你可以在右上角的菜单里随时保存这个智能体，就算目前还只是初稿也可以。",
-    saveCommandMessage:
-      "请现在根据我们目前已经讨论的全部内容保存这个自定义智能体。这就是我明确的保存确认。如果仍有少量细节缺失，请根据上下文做出合理假设，生成一份简洁的英文初始 SOUL.md，并直接调用 setup_agent，不要再向我索要额外确认。",
-    agentCreatedPendingRefresh:
-      "智能体已创建，但 bookistudios AI 暂时还无法读取到它。请稍后刷新当前页面。",
-    more: "更多操作",
-    agentCreated: "智能体已创建！",
-    startChatting: "开始对话",
-    backToGallery: "返回 Gallery",
-  },
 
   // Breadcrumb
   breadcrumb: {
