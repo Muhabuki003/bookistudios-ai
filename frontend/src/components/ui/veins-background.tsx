@@ -77,7 +77,7 @@ void main(){
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-const VERT = `void main(){ gl_Position = vec4(position, 1.0); }`;
+const VERT = `attribute vec2 position; void main(){ gl_Position = vec4(position, 0.0, 1.0); }`;
 
 // Ping-pong timing (seconds per direction; then it reverses and unravels).
 const HALF_CYCLE = 45; // ~45s to form, ~45s to unravel
