@@ -18,7 +18,7 @@ export function Hero({ className }: { className?: string }) {
       )}
     >
       <div className="absolute inset-0 z-0 bg-[#080808]">
-        <VeinsBackground className="opacity-[0.55]" />
+        <VeinsBackground className="opacity-[0.7]" />
       </div>
       <div className="container-md relative z-10 mx-auto flex h-screen flex-col items-center justify-center">
         <h1 className="flex items-center gap-2 text-4xl font-bold md:text-6xl">

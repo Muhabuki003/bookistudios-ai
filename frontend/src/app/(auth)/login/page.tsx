@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { EarlyAccessModal } from "@/components/early-access-modal";
@@ -50,7 +49,6 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
-  const { theme, resolvedTheme } = useTheme();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -198,14 +196,9 @@ export default function LoginPage() {
     check();
   }, []);
 
-  const actualTheme = theme === "system" ? resolvedTheme : theme;
-
   return (
     <div className="bg-background flex min-h-screen items-center justify-center">
-      <VeinsBackground
-        className="absolute inset-0 z-0"
-        light={actualTheme === "light"}
-      />
+      <VeinsBackground className="absolute inset-0 z-0 opacity-[0.35]" />
       <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
         <div className="text-center">
           <h1 className="text-foreground font-serif text-3xl">bookistudios AI</h1>

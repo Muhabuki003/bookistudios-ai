@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ type SetupMode = "loading" | "init_admin" | "change_password";
 export default function SetupPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-  const { theme, resolvedTheme } = useTheme();
   const [mode, setMode] = useState<SetupMode>("loading");
 
   // --- Shared state ---
@@ -142,8 +140,6 @@ export default function SetupPage() {
     }
   };
 
-  const actualTheme = theme === "system" ? resolvedTheme : theme;
-
   if (mode === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -156,10 +152,7 @@ export default function SetupPage() {
   if (mode === "init_admin") {
     return (
       <div className="bg-background flex min-h-screen items-center justify-center">
-        <VeinsBackground
-          className="absolute inset-0 z-0"
-          light={actualTheme === "light"}
-        />
+        <VeinsBackground className="absolute inset-0 z-0 opacity-[0.35]" />
         <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
           <div className="text-center">
             <h1 className="font-serif text-3xl">bookistudios AI</h1>
@@ -223,10 +216,7 @@ export default function SetupPage() {
   // ── Change-password form (needs_setup after login) ─────────────────
   return (
     <div className="bg-background flex min-h-screen items-center justify-center">
-      <VeinsBackground
-        className="absolute inset-0 z-0"
-        light={actualTheme === "light"}
-      />
+      <VeinsBackground className="absolute inset-0 z-0 opacity-[0.35]" />
       <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
         <div className="text-center">
           <h1 className="font-serif text-3xl">bookistudios AI</h1>
