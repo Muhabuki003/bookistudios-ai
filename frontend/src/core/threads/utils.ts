@@ -1,12 +1,12 @@
 import type { Message } from "@langchain/langgraph-sdk";
 
-import type { AgentThread } from "./types";
+import type { AgentThread, AgentThreadContext } from "./types";
 
 type ThreadRouteTarget =
   | string
   | {
       thread_id: string;
-      context?: null;
+      context?: AgentThreadContext | null;
       metadata?: Record<string, unknown> | null;
     };
 
