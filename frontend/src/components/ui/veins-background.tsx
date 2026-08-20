@@ -90,44 +90,65 @@ function sizeOf(canvas: HTMLCanvasElement) {
   return { w, h };
 }
 
-// 2D-canvas fallback: slow flowing sine "veins" — graceful degradation when
-// WebGL is unavailable, never a black void.
-function drawFallback(
-  ctx: CanvasRenderingContext2D,
-  t: number,
+function applySize(
+  canvas: HTMLCanvasElement,
   w: number,
   h: number,
-) {
-  ctx.clearRect(0, 0, w, h);
-  const glow = ctx.createRadialGradient(
-    w / 2,
-    h / 2,
-    0,
-    w / 2,
-    h / 2,
-    Math.max(w, h) * 0.7,
-  );
-  glow.addColorStop(0, "rgba(214,57,41,0.12)");
-  glow.addColorStop(1, "rgba(214,57,41,0)");
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, w, h);
-  ctx.lineWidth = 1.5;
-  ctx.lineCap = "round";
-  for (let i = 0; i < 7; i++) {
-    ctx.beginPath();
-    const baseY = (h * (i + 0.5)) / 7 + Math.sin(t * 0.08 + i * 2.1) * 24;
-    for (let x = 0; x <= w; x += 8) {
-      const y =
-        baseY +
-        Math.sin(x * 0.007 + t * 0.18 + i * 1.7) *
-          Math.sin(x * 0.0022 + i) *
-          Math.min(h * 0.06, 46);
-      if (x === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = `rgba(214,57,41,${0.08 + i * 0.018})`;
-    ctx.stroke();
+): { w: number; h: number } {
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const nw = Math.max(2, Math.floor(w * dpr));
+  const nh = Math.max(2, Math.floor(h * dpr));
+  if (nw !== canvas.width || nh !== canvas.height) {
+    canvas.width = nw;
+    canvas.height = nh;
   }
+  return { w: nw, h: nh };
+}
+
+// 2D-canvas fallback: slow flowing sine "veins" — graceful degradation when
+// WebGL is unavailable, never a black void.
+function startFallback(canvas: HTMLCanvasElement): () => void {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return () => {};
+  let raf = 0;
+  const t0 = performance.now();
+  const render = () => {
+    const { w, h } = applySize(canvas, sizeOf(canvas).w, sizeOf(canvas).h);
+    const t = (performance.now() - t0) / 1000;
+    ctx.clearRect(0, 0, w, h);
+    const glow = ctx.createRadialGradient(
+      w / 2,
+      h / 2,
+      0,
+      w / 2,
+      h / 2,
+      Math.max(w, h) * 0.7,
+    );
+    glow.addColorStop(0, "rgba(214,57,41,0.12)");
+    glow.addColorStop(1, "rgba(214,57,41,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = "round";
+    for (let i = 0; i < 7; i++) {
+      ctx.beginPath();
+      const baseY = (h * (i + 0.5)) / 7 + Math.sin(t * 0.08 + i * 2.1) * 24;
+      for (let x = 0; x <= w; x += 8) {
+        const y =
+          baseY +
+          Math.sin(x * 0.007 + t * 0.18 + i * 1.7) *
+            Math.sin(x * 0.0022 + i) *
+            Math.min(h * 0.06, 46);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `rgba(214,57,41,${0.08 + i * 0.018})`;
+      ctx.stroke();
+    }
+    raf = requestAnimationFrame(render);
+  };
+  render();
+  return () => cancelAnimationFrame(raf);
 }
 
 export function VeinsBackground({ className }: { className?: string }) {
@@ -137,9 +158,9 @@ export function VeinsBackground({ className }: { className?: string }) {
     const canvas = ref.current;
     if (!canvas) return;
 
-    // Try WebGL2 first, then WebGL1, then the legacy alias — each with a
-    // FRESH attempt (a failed getContext call poisons later different-type
-    // calls on the same canvas, so always pass the same attributes).
+    // Try WebGL2 first, then WebGL1, then the legacy alias — each with the
+    // same attributes (a failed getContext call poisons later different-type
+    // calls on the same canvas).
     const attrs: WebGLContextAttributes = {
       antialias: false,
       alpha: true,
@@ -157,150 +178,96 @@ export function VeinsBackground({ className }: { className?: string }) {
       if (gl) break;
     }
 
-    let raf = 0;
-    let observer: ResizeObserver | null = null;
+    let cleanup = () => {};
 
-    if (gl) {
+    if (!gl) {
+      cleanup = startFallback(canvas);
+    } else {
+      const G = gl; // narrowed, non-reassigned for closures
+
       const compile = (type: number, src: string): WebGLShader | null => {
-        const sh = gl.createShader(type);
+        const sh = G.createShader(type);
         if (!sh) return null;
-        gl.shaderSource(sh, src);
-        gl.compileShader(sh);
-        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-          gl.deleteShader(sh);
+        G.shaderSource(sh, src);
+        G.compileShader(sh);
+        if (!G.getShaderParameter(sh, G.COMPILE_STATUS)) {
+          G.deleteShader(sh);
           return null;
         }
         return sh;
       };
 
-      const vs = compile(gl.VERTEX_SHADER, VERT);
-      const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+      const vs = compile(G.VERTEX_SHADER, VERT);
+      const fs = compile(G.FRAGMENT_SHADER, FRAG);
       if (!vs || !fs) {
-        gl = null; // shader failed — fall through to 2D
+        cleanup = startFallback(canvas);
       } else {
-        const prog = gl.createProgram();
+        const prog = G.createProgram();
         if (!prog) {
-          gl = null;
+          cleanup = startFallback(canvas);
         } else {
-          gl.attachShader(prog, vs);
-          gl.attachShader(prog, fs);
-          gl.linkProgram(prog);
-          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-            gl = null;
+          G.attachShader(prog, vs);
+          G.attachShader(prog, fs);
+          G.linkProgram(prog);
+          if (!G.getProgramParameter(prog, G.LINK_STATUS)) {
+            cleanup = startFallback(canvas);
           } else {
-            gl.useProgram(prog);
-            const buf = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-            gl.bufferData(
-              gl.ARRAY_BUFFER,
+            G.useProgram(prog);
+            const buf = G.createBuffer();
+            G.bindBuffer(G.ARRAY_BUFFER, buf);
+            G.bufferData(
+              G.ARRAY_BUFFER,
               new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
-              gl.STATIC_DRAW,
+              G.STATIC_DRAW,
             );
-            const posLoc = gl.getAttribLocation(prog, "position");
-            gl.enableVertexAttribArray(posLoc);
-            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+            const posLoc = G.getAttribLocation(prog, "position");
+            G.enableVertexAttribArray(posLoc);
+            G.vertexAttribPointer(posLoc, 2, G.FLOAT, false, 0, 0);
 
-            const u = (name: string) => gl.getUniformLocation(prog, name);
+            const u = (name: string) => G.getUniformLocation(prog, name);
             const uTime = u("uTime");
             const uRes = u("uRes");
-            gl.uniform3f(u("uColor1"), 0.16, 0.11, 0.1);
-            gl.uniform3f(u("uColor2"), 0.03, 0.03, 0.03);
-            gl.uniform3f(u("uColor3"), 0.839, 0.224, 0.161); // #D63929 accent
-            gl.uniform1f(u("uSpeed"), 0.18);
-            gl.uniform1f(u("uWarp"), 1.25);
-            gl.uniform1f(u("uVig"), 0.4);
-            gl.uniform1f(u("uAccent"), 0.85);
-            gl.uniform1f(u("uZoom"), 0.85);
+            G.uniform3f(u("uColor1"), 0.16, 0.11, 0.1);
+            G.uniform3f(u("uColor2"), 0.03, 0.03, 0.03);
+            G.uniform3f(u("uColor3"), 0.839, 0.224, 0.161); // #D63929 accent
+            G.uniform1f(u("uSpeed"), 0.18);
+            G.uniform1f(u("uWarp"), 1.25);
+            G.uniform1f(u("uVig"), 0.4);
+            G.uniform1f(u("uAccent"), 0.85);
+            G.uniform1f(u("uZoom"), 0.85);
 
-            let w = 0;
-            let h = 0;
-            const resize = () => {
-              const s = sizeOf(canvas);
-              const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-              const nw = Math.max(2, Math.floor(s.w * dpr));
-              const nh = Math.max(2, Math.floor(s.h * dpr));
-              if (nw !== w || nh !== h) {
-                w = nw;
-                h = nh;
-                canvas.width = w;
-                canvas.height = h;
-                gl.uniform2f(uRes, w, h);
-              }
-            };
-            resize();
-
+            let raf = 0;
             const t0 = performance.now();
             const render = () => {
-              // Re-check size every frame — cheap and immune to late layout.
-              const s = sizeOf(canvas);
-              const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-              const nw = Math.max(2, Math.floor(s.w * dpr));
-              const nh = Math.max(2, Math.floor(s.h * dpr));
-              if (nw !== w || nh !== h) resize();
-
+              const { w, h } = applySize(canvas, sizeOf(canvas).w, sizeOf(canvas).h);
+              G.uniform2f(uRes, w, h);
               const elapsed = (performance.now() - t0) / 1000;
               // Triangle wave: 0→1 (form) over HALF_CYCLE, 1→0 (unravel).
               const phase = (elapsed % (HALF_CYCLE * 2)) / HALF_CYCLE;
               const tri = phase <= 1 ? phase : 2 - phase;
-              gl.uniform1f(uTime, tri * MAX_TIME);
-              gl.viewport(0, 0, canvas.width, canvas.height);
-              gl.drawArrays(gl.TRIANGLES, 0, 6);
+              G.uniform1f(uTime, tri * MAX_TIME);
+              G.viewport(0, 0, canvas.width, canvas.height);
+              G.drawArrays(G.TRIANGLES, 0, 6);
               raf = requestAnimationFrame(render);
             };
             render();
+            cleanup = () => {
+              cancelAnimationFrame(raf);
+              G.deleteProgram(prog);
+              G.deleteShader(vs);
+              G.deleteShader(fs);
+              G.deleteBuffer(buf);
+            };
           }
         }
       }
     }
 
-    // ── 2D fallback (no WebGL, or shader failed) ──────────────────────────
-    if (!gl) {
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        let w = 0;
-        let h = 0;
-        const resize2d = () => {
-          const s = sizeOf(canvas);
-          const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-          w = Math.max(2, Math.floor(s.w * dpr));
-          h = Math.max(2, Math.floor(s.h * dpr));
-          if (canvas.width !== w || canvas.height !== h) {
-            canvas.width = w;
-            canvas.height = h;
-          }
-        };
-        resize2d();
-        const t0 = performance.now();
-        const render2d = () => {
-          const s = sizeOf(canvas);
-          const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-          const nw = Math.max(2, Math.floor(s.w * dpr));
-          const nh = Math.max(2, Math.floor(s.h * dpr));
-          if (nw !== w || nh !== h) resize2d();
-          const t = (performance.now() - t0) / 1000;
-          drawFallback(ctx, t, w, h);
-          raf = requestAnimationFrame(render2d);
-        };
-        render2d();
-      }
-    }
-
+    let observer: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
       observer = new ResizeObserver(() => {
         try {
-          const s = sizeOf(canvas);
-          const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-          const nw = Math.max(2, Math.floor(s.w * dpr));
-          const nh = Math.max(2, Math.floor(s.h * dpr));
-          if (nw !== canvas.width || nh !== canvas.height) {
-            canvas.width = nw;
-            canvas.height = nh;
-            if (gl) {
-              const prog = gl.getParameter(gl.CURRENT_PROGRAM);
-              const uResLoc = gl.getUniformLocation(prog, "uRes");
-              if (uResLoc) gl.uniform2f(uResLoc, nw, nh);
-            }
-          }
+          applySize(canvas, sizeOf(canvas).w, sizeOf(canvas).h);
         } catch {
           // observer errors are non-fatal
         }
@@ -309,7 +276,7 @@ export function VeinsBackground({ className }: { className?: string }) {
     }
 
     return () => {
-      cancelAnimationFrame(raf);
+      cleanup();
       observer?.disconnect();
     };
   }, []);
