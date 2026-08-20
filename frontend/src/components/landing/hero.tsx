@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { SmokeBackground } from "@/components/ui/smoke-background";
-import { WordRotate } from "@/components/ui/word-rotate";
 import { env } from "@/env";
 import { cn } from "@/lib/utils";
 
@@ -22,24 +21,7 @@ export function Hero({ className }: { className?: string }) {
       </div>
       <div className="container-md relative z-10 mx-auto flex h-screen flex-col items-center justify-center">
         <h1 className="flex items-center gap-2 text-4xl font-bold md:text-6xl">
-          <WordRotate
-            words={[
-              "Deep Research",
-              "Collect Data",
-              "Analyze Data",
-              "Generate Webpages",
-              "Vibe Coding",
-              "Generate Slides",
-              "Generate Images",
-              "Generate Podcasts",
-              "Generate Videos",
-              "Generate Songs",
-              "Organize Emails",
-              "Do Anything",
-              "Learn Anything",
-            ]}
-          />{" "}
-          <div>with bookistudios AI</div>
+          <div>Do Anything with bookistudios AI</div>
         </h1>
         {env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY && (
           <a
