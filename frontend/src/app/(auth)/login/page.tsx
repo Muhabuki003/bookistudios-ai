@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { EarlyAccessModal } from "@/components/early-access-modal";
 import { Button } from "@/components/ui/button";
-import { VeinsBackground } from "@/components/ui/veins-background";
+import { BrainArcBackground } from "@/components/ui/brain-arc-background";
 import { Input } from "@/components/ui/input";
 import { setBsaiUserCookie } from "@/components/workspace/bsai-user-cookie";
 import { useAuth } from "@/core/auth/AuthProvider";
@@ -198,7 +198,7 @@ export default function LoginPage() {
 
   return (
     <div className="bg-background flex min-h-screen items-center justify-center">
-      <VeinsBackground className="absolute inset-0 z-0 opacity-[0.35]" />
+      <BrainArcBackground className="absolute inset-x-0 bottom-8 h-[16vh] w-full opacity-[0.35]" />
       <div className="border-border/20 bg-background/5 w-full max-w-md space-y-6 rounded-3xl border p-8 backdrop-blur-sm">
         <div className="text-center">
           <h1 className="text-foreground font-serif text-3xl">bookistudios AI</h1>
