@@ -1,10 +1,10 @@
 # About BookiStudio AI
 
-> **Built by Adrien** — founder of BookiStudios / BUKIMIND
+> **Built by BookiStudios** — BUKIMIND
 
-**BookiStudio AI** is a private, employee-grade AI workspace built from the ground up by Adrien. It's designed to give every member of the team their own intelligent agent — one that researches, codes, creates, and executes tasks autonomously.
+**BookiStudio AI** is a private, employee-grade AI workspace built from the ground up by BookiStudios. It's designed to give every member of the team their own intelligent agent — one that researches, codes, creates, and executes tasks autonomously.
 
-This isn't a community project or a fork. BookiStudio AI is **Adrien's vision** — a SuperAgent harness that runs your business operations, handles workflows, and scales with the team.
+This isn't a community project or a fork. BookiStudio AI is the **BookiStudios vision** — a SuperAgent harness that runs your business operations, handles workflows, and scales with the team.
 
 ---
 
@@ -22,6 +22,6 @@ For questions, help, or feature requests: [support@bookistudios.com](mailto:supp
 
 ## 👤 Built By
 
-> **Adrien** — Founder, BookiStudios / BUKIMIND
+> **BookiStudios** — BUKIMIND
 
-BookiStudio AI is the result of Adrien's push to build an AI-powered workflow platform that puts the team first. No middlemen, no corporate bloat — just agents that work for you.
+BookiStudio AI is the result of BookiStudios' push to build an AI-powered workflow platform that puts the team first. No middlemen, no corporate bloat — just agents that work for you.
